@@ -265,7 +265,6 @@
                 // Day 2: 2024-11-26
                 { time: "2024-11-26 09:00:16", bpm: 112, spO2: 95, temp: 37.4, stress: "High", lat: 22.3254, lon: 70.0145 },
                 { time: "2024-11-26 09:00:18", bpm: 105, spO2: 96, temp: 37.3, stress: "Medium", lat: 22.3254, lon: 70.0146 },
-                // *** THIS WAS THE BUG *** Was "2024-1Z-26 09:00:20"
                 { time: "2024-11-26 09:00:20", bpm: 100, spO2: 97, temp: 37.2, stress: "Medium", lat: 22.3255, lon: 70.0146 },
                 { time: "2024-11-26 09:00:22", bpm: 95, spO2: 97, temp: 37.1, stress: "Low", lat: 22.3255, lon: 70.0147 },
                 { time: "2024-11-26 09:00:24", bpm: 92, spO2: 98, temp: 37.0, stress: "Low", lat: 22.3256, lon: 70.0147 },
@@ -290,7 +289,6 @@
                 { time: "2024-11-28 09:00:22", bpm: 102, spO2: 96, temp: 37.1, stress: "High", lat: 22.3244, lon: 70.0131 },
                 { time: "2024-11-28 09:00:24", bpm: 98, spO2: 97, temp: 37.0, stress: "Medium", lat: 22.3243, lon: 70.0132 },
                 { time: "2024-11-28 09:00:26", bpm: 94, spO2: 97, temp: 36.9, stress: "Medium", lat: 22.3242, lon: 70.0132 },
-                // *** THIS WAS THE BUG *** Was "2024-1Z-28 09:00:28"
                 { time: "2024-11-28 09:00:28", bpm: 90, spO2: 98, temp: 36.8, stress: "Low", lat: 22.3241, lon: 70.0133 },
                 { time: "2024-11-28 09:00:30", bpm: 88, spO2: 98, temp: 36.8, stress: "Low", lat: 22.3240, lon: 70.0133 }
             ]
@@ -592,6 +590,7 @@
             elements.statusIndicator.classList.remove('bg-safe-green', 'bg-warn-yellow');
             elements.statusIndicator.classList.add('bg-slate-400');
 
+            // *** THIS WAS THE BUG: updateLiveVVitals -> updateLiveVitals ***
             updateLiveVitals(null); // Clear vitals
             
             // Remove highlights from charts
@@ -671,6 +670,7 @@
                 mapContainer: document.querySelector('.map-container'),
                 locationDot: document.getElementById('locationDot'),
                 bpmChartCtx: document.getElementById('bpmChart').getContext('2d'),
+                // *** THIS WAS THE BUG: stray period '.' -> NOW FIXED ***
                 spo2ChartCtx: document.getElementById('spo2Chart').getContext('2d'),
                 tempChartCtx: document.getElementById('tempChart').getContext('2d'),
                 stressChartCtx: document.getElementById('stressChart').getContext('2d')
