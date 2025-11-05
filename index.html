@@ -590,7 +590,6 @@
             elements.statusIndicator.classList.remove('bg-safe-green', 'bg-warn-yellow');
             elements.statusIndicator.classList.add('bg-slate-400');
 
-            // *** THIS WAS THE BUG: updateLiveVVitals -> updateLiveVitals ***
             updateLiveVitals(null); // Clear vitals
             
             // Remove highlights from charts
@@ -622,7 +621,7 @@
                 
                 // Show first data point in live view
                 const firstData = fixedRecordedData[workerId][0];
-                updateLiveVitals(firstData);
+                updateLiveVVitals(firstData);
             } else {
                 currentState.selectedWorkerId = null;
                 elements.playButton.disabled = true;
@@ -654,6 +653,7 @@
          */
         document.addEventListener('DOMContentLoaded', () => {
             // Cache DOM elements
+            // *** THIS IS THE FIX: Added missing commas after each line ***
             elements = {
                 workerSelect: document.getElementById('workerSelect'),
                 playButton: document.getElementById('playButton'),
@@ -670,7 +670,6 @@
                 mapContainer: document.querySelector('.map-container'),
                 locationDot: document.getElementById('locationDot'),
                 bpmChartCtx: document.getElementById('bpmChart').getContext('2d'),
-                // *** THIS WAS THE BUG: stray period '.' -> NOW FIXED ***
                 spo2ChartCtx: document.getElementById('spo2Chart').getContext('2d'),
                 tempChartCtx: document.getElementById('tempChart').getContext('2d'),
                 stressChartCtx: document.getElementById('stressChart').getContext('2d')
