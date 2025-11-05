@@ -210,7 +210,7 @@
                         </div>
                     </div>
 
-                    <!-- Live Location Panel -->
+<!-- Live Location Panel -->
                     <div class="bg-white rounded-lg shadow p-6 xl:col-span-2">
                         <h3 class="text-lg font-semibold text-slate-800 mb-2">Live Location</h3>
                         <h4 class="text-sm font-medium text-slate-600 mb-4">Site Location: GSFC Plant, Moti Khavdi</h4>
@@ -621,7 +621,8 @@
                 
                 // Show first data point in live view
                 const firstData = fixedRecordedData[workerId][0];
-                updateLiveVVitals(firstData);
+                // *** THIS WAS THE SECOND BUG: updateLiveVVitals -> updateLiveVitals ***
+                updateLiveVitals(firstData);
             } else {
                 currentState.selectedWorkerId = null;
                 elements.playButton.disabled = true;
@@ -653,7 +654,7 @@
          */
         document.addEventListener('DOMContentLoaded', () => {
             // Cache DOM elements
-            // *** THIS IS THE FIX: Added missing commas after each line ***
+            // *** THIS WAS THE FIRST BUG: Added missing commas ***
             elements = {
                 workerSelect: document.getElementById('workerSelect'),
                 playButton: document.getElementById('playButton'),
