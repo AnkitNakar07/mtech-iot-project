@@ -1,223 +1,236 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-gray-50">
+<html lang="en">
 <head>
-    <meta charset="UTF-R">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Workplace Safety IoT Simulator</title>
+    
     <!-- 1. Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
     <!-- 2. Load Chart.js for data visualization -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- 3. Load Date adapter for Chart.js -->
+    
+    <!-- 
+      3. LOAD DATE LIBRARIES (THIS IS THE FIX)
+      We need both date-fns AND the adapter. 
+      The missing date-fns library was causing the error.
+    -->
+    <script src="https://cdn.jsdelivr.net/npm/date-fns@2.29.3/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+
     <script>
         tailwind.config = {
             theme: {
                 extend: {
+                    colors: {
+                        'brand-blue': '#005A9C',
+                        'brand-blue-dark': '#003E6B',
+                        'brand-blue-light': '#E6F0F6',
+                        'safe-green': '#10B981',
+                        'warn-yellow': '#F59E0B',
+                        'danger-red': '#EF4444',
+                    },
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
                     },
-                    colors: {
-                        'safety-red': '#D92D20',
-                        'safety-green': '#027A48',
-                        'safety-amber': '#F79009',
-                    }
-                }
-            }
+                },
+            },
         }
     </script>
     <style>
-        /* Custom styles for the app */
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-        .live-dot {
-            width: 12px;
-            height: 12px;
-            background-color: #10B981;
-            border-radius: 50%;
-            animation: pulse 1.5s infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
-        .live-dot.paused {
-            animation: none;
-            background-color: #6B7280;
-        }
-        /* Chart.js responsiveness fix */
-        .chart-container {
-            position: relative;
-            height: 250px;
-            width: 100%;
-        }
-        /* New styles for the map */
+        /* Custom map container styles */
         .map-container {
             position: relative;
             width: 100%;
-            height: 250px;
-            background-color: #e2e8f0; /* slate-200 */
+            height: 200px; /* Fixed height for the map */
+            background-color: #E2E8F0; /* Light gray background */
             border-radius: 0.5rem;
+            border: 2px dashed #94A3B8;
             overflow: hidden;
-            border: 1px solid #cbd5e1; /* slate-300 */
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
             /* Simple grid background */
-            background-image:
-                linear-gradient(to right, #cbd5e1 1px, transparent 1px),
-                linear-gradient(to bottom, #cbd5e1 1px, transparent 1px);
+            background-image: 
+                linear-gradient(to right, #CBD5E1 1px, transparent 1px),
+                linear-gradient(to bottom, #CBD5E1 1px, transparent 1px);
             background-size: 20px 20px;
         }
+
         .location-dot {
             position: absolute;
             width: 16px;
             height: 16px;
-            background-color: #D92D20; /* safety-red */
+            background-color: #EF4444; /* danger-red */
             border-radius: 50%;
-            border: 2px solid white;
-            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+            border: 2px solid #FFFFFF;
+            box-shadow: 0 0 8px 2px #EF4444;
             transform: translate(-50%, -50%); /* Center the dot */
-            transition: left 1.5s linear, top 1.5s linear;
-            display: none; /* Hidden by default */
+            transition: top 0.5s linear, left 0.5s linear; /* Smooth movement */
+        }
+
+        /* Chart container to enforce aspect ratio */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
         }
     </style>
 </head>
-<body class="h-full">
-    <div class="flex flex-col lg:flex-row min-h-screen">
 
-        <!-- ===== LEFT PANEL: Control & Simulation ===== -->
-        <aside class="w-full lg:w-1/3 xl:w-1/4 p-6 bg-slate-100 border-r border-slate-200">
-            <h2 class="text-2xl font-bold text-slate-800">IoT Control Panel</h2>
-            <p class="text-sm text-slate-600 mb-6">Playback pre-recorded worker data.</p>
+<body class="bg-slate-100 font-sans antialiased">
 
-            <!-- Worker Selection -->
-            <div class="mb-6">
-                <label for="workerSelect" class="block text-sm font-medium text-slate-700 mb-2">Select Worker Device</label>
-                <select id="workerSelect" class="w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    <option value="worker-001">Worker 1 Ramesh kumar</option>
-                    <option value="worker-002">Worker 2 Nandlal Mahto</option>
-                    <option value="worker-003">Worker 3 Sanjay Kumar</option>
-                </select>
+    <!-- Header -->
+    <header class="bg-brand-blue shadow-md">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <span class="text-white text-xl font-bold">IoT Workplace Safety Simulator</span>
+                </div>
+                <div class="text-white text-sm">
+                    M.Tech Thesis Project
+                </div>
             </div>
+        </nav>
+    </header>
 
-            <!-- Monitoring Controls -->
-            <div class="flex space-x-3 mb-6">
-                <button id="startButton" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg font-medium shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                    Play Simulation
-                </button>
-                <button id="stopButton" class="flex-1 bg-gray-600 text-white px-4 py-2 rounded-lg font-medium shadow-sm hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2" disabled>
-                    Stop / Reset
-                </button>
-            </div>
+    <!-- Main Content Grid -->
+    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-            <!-- Live Data Feed -->
-            <div class="bg-white rounded-lg shadow p-4">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold text-slate-900">Live Vitals</h3>
-                    <div id="liveStatus" class="flex items-center space-x-2">
-                        <div id="liveDot" class="live-dot paused"></div>
-                        <span id="liveText" class="text-sm font-medium text-gray-500">Paused</span>
+            <!-- Left Panel: Controls -->
+            <div class="lg:col-span-1 space-y-6">
+                
+                <!-- Worker Selection -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-4">Select Worker Device</h3>
+                    <select id="workerSelect" class="w-full p-3 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-blue">
+                        <option value="">-- Select a Worker --</option>
+                        <option value="worker-001">Worker 1 Ramesh kumar</option>
+                        <option value="worker-002">Worker 2 Nandlal Mahto</option>
+                        <option value="worker-003">Worker 3 Sanjay Kumar</option>
+                    </select>
+
+                    <div class="mt-6 flex space-x-4">
+                        <button id="playButton" class="w-full bg-brand-blue text-white font-semibold py-3 px-4 rounded-lg shadow hover:bg-brand-blue-dark focus:outline-none focus:ring-2 focus:ring-brand-blue focus:ring-opacity-50 transition duration-200" disabled>
+                            Play Simulation
+                        </button>
+                        <button id="stopButton" class="w-full bg-slate-600 text-white font-semibold py-3 px-4 rounded-lg shadow hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-opacity-50 transition duration-200" disabled>
+                            Stop / Reset
+                        </button>
                     </div>
                 </div>
-                <!-- Updated grid for 5 items -->
-                <div class="grid grid-cols-3 gap-4 text-sm">
-                    <div>
-                        <div class="text-slate-500">Heart Rate</div>
-                        <div id="liveBPM" class="text-2xl font-bold text-slate-800">--</div>
+
+                <!-- Live Vitals Panel -->
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-4">Live Vitals</h3>
+                    <div class="flex items-center justify-between mb-4">
+                        <span id="statusText" class="text-sm font-medium text-slate-500">Paused</span>
+                        <div id="statusIndicator" class="w-4 h-4 rounded-full bg-slate-400 transition-colors duration-300"></div>
                     </div>
-                    <div>
-                        <div class="text-slate-500">SpO2</div>
-                        <div id="liveSpO2" class="text-2xl font-bold text-slate-800">--</div>
-                    </div>
-                     <div>
-                        <div class="text-slate-500">Stress</div>
-                        <div id="liveStress" class="text-2xl font-bold text-slate-800">--</div>
-                    </div>
-                    <div>
-                        <div class="text-slate-500">Body Temp</div>
-                        <div id="liveTemp" class="text-2xl font-bold text-slate-800">--</div>
-                    </div>
-                    <div class="col-span-2">
-                        <div class="text-slate-500">Location</div>
-                        <div class="font-mono text-xs text-slate-800">
-                            Lat: <span id="liveLat">--</span>
+                    
+                    <div class="grid grid-cols-3 gap-4 text-center">
+                        <div>
+                            <span class="text-xs text-slate-500 uppercase">Heart Rate</span>
+                            <p id="liveBpm" class="text-3xl font-bold text-slate-800">--</p>
                         </div>
-                        <div class="font-mono text-xs text-slate-800">
-                            Lon: <span id="liveLon">--</span>
+                        <div>
+                            <span class="text-xs text-slate-500 uppercase">SpO2</span>
+                            <p id="liveSpO2" class="text-3xl font-bold text-slate-800">--</p>
+                        </div>
+                         <div>
+                            <span class="text-xs text-slate-500 uppercase">Stress</span>
+                            <p id="liveStress" class="text-xl font-bold text-slate-800">--</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 text-center mt-6">
+                         <div>
+                            <span class="text-xs text-slate-500 uppercase">Body Temp</span>
+                            <p id="liveTemp" class="text-2xl font-bold text-slate-800">--</p>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-500 uppercase">Location</span>
+                            <p id="liveLat" class="text-sm font-medium text-slate-800">Lat: --</p>
+                            <p id="liveLon" class="text-sm font-medium text-slate-800">Lon: --</p>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Data Export -->
-            <div class="mt-8">
-                <h3 class="text-lg font-semibold text-slate-900 mb-3">Data Export</h3>
-                <p class="text-sm text-slate-600 mb-3">Download the complete, fixed dataset for all workers as a JSON file.</p>
-                <button id="downloadButton" class="w-full bg-safety-green text-white px-4 py-2 rounded-lg font-medium shadow-sm hover:bg-green-700">
-                    Download Data (.json)
-                </button>
-            </div>
-        </aside>
-
-        <!-- ===== RIGHT PANEL: Dashboard & Results ===== -->
-        <main class="w-full lg:w-2/3 xl:w-3/4 p-6 lg:p-10">
-            <h1 id="dashboardTitle" class="text-3xl font-bold text-slate-900 mb-6">Safety Dashboard: Worker 1 Ramesh kumar</h1>
-
-            <!-- How to Use -->
-            <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded-md mb-8">
-                <h4 class="font-bold">How to Use This Simulator</h4>
-                <p class="text-sm">
-                    1. Select a worker. Their *full data history* will load on the charts.
-                    <br>2. Click *"Play Simulation"* to watch the data playback in real-time.
-                    <br>3. Click *"Stop / Reset"* to stop playback and clear the charts.
-                    <br>4. Take screenshots of this dashboard for your thesis "Results" section.
-                    <br>5. Click *"Download Data"* to get the raw JSON for all 3 workers.
-                </p>
-            </div>
-
-            <!-- Chart Grid -->
-            <!-- Updated to 2x2 grid -->
-            <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
-                <!-- Heart Rate Chart -->
+                <!-- Data Export Panel -->
                 <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-semibold text-slate-800 mb-4">Heart Rate (BPM)</h3>
-                    <div class="chart-container">
-                        <canvas id="bpmChart"></canvas>
-                    </div>
-                </div>
-                <!-- SpO2 Chart -->
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-semibold text-slate-800 mb-4">Blood Oxygen (SpO2 %)</h3>
-                    <div class="chart-container">
-                        <canvas id="spO2Chart"></canvas>
-                    </div>
-                </div>
-                <!-- Body Temp Chart -->
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-semibold text-slate-800 mb-4">Body Temperature (°C)</h3>
-                    <div class="chart-container">
-                        <canvas id="tempChart"></canvas>
-                    </div>
-                </div>
-                <!-- Stress Level Chart -->
-                <div classs="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-semibold text-slate-800 mb-4">Stress Level</h3>
-                    <div class="chart-container">
-                        <canvas id="stressChart"></canvas>
-                    </div>
-                </div>
-                 <!-- Live Location Panel -->
-                <div class="bg-white rounded-lg shadow p-6 xl:col-span-2">
-                    <h3 class="text-lg font-semibold text-slate-800 mb-2">Live Location</h3>
-                    <h4 class="text-sm font-medium text-slate-600 mb-4">Site Location: GSFC Plant, Moti Khavdi</h4>
-                    <div class="map-container">
-                        <div id="locationDot" class="location-dot"></div>
-                    </div>
+                    <h3 class="text-lg font-semibold text-slate-800 mb-2">Data Export</h3>
+                    <p class="text-sm text-slate-600 mb-4">Download the complete, fixed dataset for all workers as a JSON file.</p>
+                    <button id="downloadButton" class="w-full bg-safe-green text-white font-semibold py-3 px-4 rounded-lg shadow hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition duration-200">
+                        Download Data (.json)
+                    </button>
                 </div>
             </div>
 
-        </main>
-    </div>
+            <!-- Right Panel: Dashboard -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Instructions -->
+                <div class="bg-brand-blue-light border-l-4 border-brand-blue text-brand-blue-dark p-6 rounded-lg shadow">
+                    <h3 class="text-lg font-semibold mb-2">How to Use This Simulator</h3>
+                    <ol class="list-decimal list-inside text-sm space-y-1">
+                        <li>Select a worker. Their full data history will load on the charts.</li>
+                        <li>Click "Play Simulation" to watch the data playback in real-time.</li>
+                        <li>Click "Stop / Reset" to stop playback and clear the charts.</li>
+                        <li>Take screenshots of this dashboard for your thesis "Results" section.</li>
+                        <li>Click "Download Data" to get the raw JSON for all 3 workers.</li>
+                    </ol>
+                </div>
 
+                <!-- Charts Grid -->
+                <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                    
+                    <!-- Heart Rate Chart -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold text-slate-800 mb-4">Heart Rate (BPM)</h3>
+                        <div class="chart-container">
+                            <canvas id="bpmChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Blood Oxygen Chart -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold text-slate-800 mb-4">Blood Oxygen (SpO2 %)</h3>
+                        <div class="chart-container">
+                            <canvas id="spo2Chart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Body Temp Chart -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold text-slate-800 mb-4">Body Temperature (°C)</h3>
+                        <div class="chart-container">
+                            <canvas id="tempChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Stress Level Chart -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold text-slate-800 mb-4">Stress Level</h3>
+                        <div class="chart-container">
+                            <canvas id="stressChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Live Location Panel -->
+                    <div class="bg-white rounded-lg shadow p-6 xl:col-span-2">
+                        <h3 class="text-lg font-semibold text-slate-800 mb-2">Live Location</h3>
+                        <h4 class="text-sm font-medium text-slate-600 mb-4">Site Location: GSFC Plant, Moti Khavdi</h4>
+                        <div class="map-container">
+                            <div id="locationDot" class="location-dot"></div>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-2 text-center">Simulated worker movement within the plant area.</p>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- MAIN SCRIPT -->
     <script>
         // === 1. FIXED PRE-RECORDED DATA ===
         // This is the complete, fixed dataset for your thesis.
@@ -280,359 +293,401 @@
                 { time: "2024-11-28 09:00:22", bpm: 102, spO2: 96, temp: 37.1, stress: "High", lat: 22.3244, lon: 70.0131 },
                 { time: "2024-11-28 09:00:24", bpm: 98, spO2: 97, temp: 37.0, stress: "Medium", lat: 22.3243, lon: 70.0132 },
                 { time: "2024-11-28 09:00:26", bpm: 94, spO2: 97, temp: 36.9, stress: "Medium", lat: 22.3242, lon: 70.0132 },
-                { time: "2024-1Z-28 09:00:28", bpm: 90, spO2: 98, temp: 36.8, stress: "Low", lat: 22.3241, lon: 70.0133 },
+                { time: "2024-11-28 09:00:28", bpm: 90, spO2: 98, temp: 36.8,.stress: "Low", lat: 22.3241, lon: 70.0133 },
                 { time: "2024-11-28 09:00:30", bpm: 88, spO2: 98, temp: 36.8, stress: "Low", lat: 22.3240, lon: 70.0133 }
             ]
         };
 
         // Bounds of our simulated map for normalization
+        // Centered on GSFC Plant, Moti Khavdi
         const mapBounds = {
             minLat: 22.3240, maxLat: 22.3260,
             minLon: 70.0130, maxLon: 70.0150
         };
 
         // === 2. STATE MANAGEMENT ===
-        let playbackInterval = null;
-        let currentDataIndex = 0;
-        let selectedWorkerId = 'worker-001';
-        let selectedWorkerName = 'Worker 1 Ramesh kumar';
-        
-        // This object will store the data during playback for charts
-        let simulationData = {
-            'worker-001': { heartRate: [], spO2: [], temp: [], stress: [] },
-            'worker-002': { heartRate: [], spO2: [], temp: [], stress: [] },
-            'worker-003': { heartRate: [], spO2: [], temp: [], stress: [] },
+        let currentState = {
+            selectedWorkerId: null,
+            simulationInterval: null,
+            currentDataIndex: 0,
+            isPlaying: false,
         };
 
-        let charts = {}; // To store Chart.js instances
-
-        // Helper function to map stress to a number
-        const stressToNum = (stress) => {
-            if (stress === "Low") return 1;
-            if (stress === "Medium") return 2;
-            if (stress === "High") return 3;
-            return 0;
+        // Chart.js instances
+        let charts = {
+            bpm: null,
+            spo2: null,
+            temp: null,
+            stress: null
         };
 
+        // DOM Element references
+        let elements = {};
 
-        document.addEventListener('DOMContentLoaded', () => {
 
-            // === 3. UI ELEMENTS ===
-            const workerSelect = document.getElementById('workerSelect');
-            const startButton = document.getElementById('startButton');
-            const stopButton = document.getElementById('stopButton');
-            const dashboardTitle = document.getElementById('dashboardTitle');
-            
-            // Live Data UI
-            const liveDot = document.getElementById('liveDot');
-            const liveText = document.getElementById('liveText');
-            const liveBPM = document.getElementById('liveBPM');
-            const liveSpO2 = document.getElementById('liveSpO2');
-            const liveTemp = document.getElementById('liveTemp');
-            const liveLat = document.getElementById('liveLat');
-            const liveLon = document.getElementById('liveLon');
-            const liveStress = document.getElementById('liveStress');
+        // === 3. CORE FUNCTIONS ===
 
-            // Location Map UI
-            const locationDot = document.getElementById('locationDot');
+        /**
+         * Initializes all charts with empty data.
+         * This function is called once on page load.
+         */
+        function initCharts() {
+            // Destroy old charts if they exist
+            Object.values(charts).forEach(chart => {
+                if (chart) chart.destroy();
+            });
 
-            // Data Export
-            const downloadButton = document.getElementById('downloadButton');
-
-            // === 4. CHART INITIALIZATION ===
-            function initCharts() {
-                // Destroy old charts if they exist
-                Object.values(charts).forEach(chart => chart.destroy());
-
-                const commonOptions = (title) => ({
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: { 
-                            type: 'time', // Use time scale
-                            time: {
-                                tooltipFormat: 'MMM dd, yyyy HH:mm:ss', // Format for the tooltip
-                                displayFormats: {
-                                    second: 'HH:mm:ss',
-                                    minute: 'HH:mm',
-                                    hour: 'HH:mm',
-                                    day: 'MMM dd' 
-                                }
-                            },
-                            title: { display: true, text: 'Date / Time' },
-                            ticks: {
-                                autoSkip: true,
-                                maxTicksLimit: 10 // Limit ticks to prevent overlap
+            const commonOptions = (title) => ({
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: { 
+                        type: 'time', // Use time scale
+                        time: {
+                            tooltipFormat: 'MMM dd, yyyy HH:mm:ss', // Format for the tooltip
+                            displayFormats: {
+                                second: 'HH:mm:ss',
+                                minute: 'HH:mm',
+                                hour: 'HH:mm',
+                                day: 'MMM dd' 
                             }
                         },
-                        y: { title: { display: true, text: title } }
-                    },
-                    plugins: { 
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                title: function(tooltipItems) {
-                                    // Custom tooltip title format
-                                    const date = new Date(tooltipItems[0].parsed.x);
-                                    return date.toLocaleString('en-US', { 
-                                        year: 'numeric', 
-                                        month: 'short', 
-                                        day: 'numeric', 
-                                        hour: '2-digit', 
-                                        minute: '2-digit', 
-                                        second: '2-digit' 
-                                    });
-                                }
-                            }
+                        title: { display: true, text: 'Date / Time' },
+                        ticks: {
+                            autoSkip: true,
+                            maxTicksLimit: 10 // Limit ticks to prevent overlap
                         }
                     },
-                    animation: { duration: 500 }
-                });
-
-                charts.bpm = new Chart(document.getElementById('bpmChart').getContext('2d'), {
-                    type: 'line',
-                    data: { labels: [], datasets: [{ data: [], borderColor: '#3B82F6', tension: 0.1, fill: false }] },
-                    options: { ...commonOptions('BPM'), scales: { ...commonOptions('BPM').scales, y: { min: 40, max: 130 } } }
-                });
-
-                charts.spO2 = new Chart(document.getElementById('spO2Chart').getContext('2d'), {
-                    type: 'line',
-                    data: { labels: [], datasets: [{ data: [], borderColor: '#10B981', tension: 0.1, fill: false }] },
-                    options: { ...commonOptions('SpO2 %'), scales: { ...commonOptions('SpO2 %').scales, y: { min: 90, max: 101 } } }
-                });
-                
-                charts.temp = new Chart(document.getElementById('tempChart').getContext('2d'), {
-                    type: 'line',
-                    data: { labels: [], datasets: [{ data: [], borderColor: '#F79009', tension: 0.1, fill: false }] },
-                    options: { ...commonOptions('Temp °C'), scales: { ...commonOptions('Temp °C').scales, y: { min: 35, max: 39 } } }
-                });
-
-                charts.stress = new Chart(document.getElementById('stressChart').getContext('2d'), {
-                    type: 'line',
-                    data: { labels: [], datasets: [{ data: [], borderColor: '#6B7280', tension: 0.1, fill: false, stepped: true }] },
-                    options: { 
-                        ...commonOptions('Stress Level'), 
-                        scales: { 
-                            ...commonOptions('Stress Level').scales, 
-                            y: { 
-                                min: 0.5, 
-                                max: 3.5,
-                                ticks: {
-                                    stepSize: 1,
-                                    callback: function(value, index, ticks) {
-                                        if (value === 1) return 'Low';
-                                        if (value === 2) return 'Medium';
-                                        if (value === 3) return 'High';
-                                        return '';
-                                    }
-                                }
-                            } 
-                        } 
+                    y: { 
+                        title: { display: true, text: title },
+                        beginAtZero: false 
                     }
-                });
-            }
+                },
+                plugins: { 
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            title: function(tooltipItems) {
+                                // Custom tooltip title format
+                                const date = new Date(tooltipItems[0].parsed.x);
+                                return date.toLocaleString('en-US', { 
+                                    year: 'numeric', 
+                                    month: 'short', 
+                                    day: 'numeric', 
+                                    hour: '2-digit', 
+                                    minute: '2-digit', 
+                                    second: '2-digit' 
+                                });
+                            }
+                        }
+                    }
+                },
+                animation: { duration: 0 } // No animation on initial load
+            });
 
-            // === 5. CORE LOGIC ===
+            // Specific options for SpO2 chart (range 90-100)
+            const spo2Options = commonOptions('SpO2 %');
+            spo2Options.scales.y.min = 90;
+            spo2Options.scales.y.max = 100;
+            
+            // Specific options for Temp chart (range 35-40)
+            const tempOptions = commonOptions('Temperature °C');
+            tempOptions.scales.y.min = 35;
+            tempOptions.scales.y.max = 40;
 
-            function startPlayback() {
-                if (playbackInterval) return; // Already running
-
-                // Clear current data and charts
-                resetSimulation();
-                
-                // Set UI to "running" state
-                startButton.disabled = true;
-                stopButton.disabled = false;
-                liveDot.classList.remove('paused');
-                liveText.textContent = 'Live';
-                liveText.classList.remove('text-gray-500');
-                liveText.classList.add('text-green-600');
-
-                // Start playback loop
-                currentDataIndex = 0;
-                playbackInterval = setInterval(playNextDataPoint, 2000); // New data every 2 seconds
-            }
-
-            function playNextDataPoint() {
-                const workerData = fixedRecordedData[selectedWorkerId];
-                
-                if (currentDataIndex >= workerData.length) {
-                    stopPlayback(); // Reached end of data
-                    return;
+            // Specific options for Stress chart (0=Low, 1=Medium, 2=High)
+            const stressOptions = commonOptions('Stress Level');
+            stressOptions.scales.y = {
+                ...stressOptions.scales.y,
+                min: 0,
+                max: 2,
+                ticks: {
+                    stepSize: 1,
+                    callback: function(value) {
+                        return ['Low', 'Medium', 'High'][value];
+                    }
                 }
+            };
 
-                const dataPoint = workerData[currentDataIndex];
-                
-                // --- Store Data for charts ---
-                const playbackBuffer = simulationData[selectedWorkerId];
-                playbackBuffer.heartRate.push({ x: dataPoint.time, y: dataPoint.bpm });
-                playbackBuffer.spO2.push({ x: dataPoint.time, y: dataPoint.spO2 });
-                playbackBuffer.temp.push({ x: dataPoint.time, y: dataPoint.temp });
-                playbackBuffer.stress.push({ x: dataPoint.time, y: stressToNum(dataPoint.stress) });
+            // Map stress string to a number
+            const stressToNum = (stress) => {
+                if (stress === 'High') return 2;
+                if (stress === 'Medium') return 1;
+                return 0;
+            };
 
-                // --- Update Live UI ---
-                updateLiveUI(dataPoint);
-                
-                // --- Update Visuals ---
-                updateCharts();
-                updateLocationMap(dataPoint.lat, dataPoint.lon);
-
-                currentDataIndex++;
-            }
+            // Get all data for the selected worker
+            const workerData = fixedRecordedData[currentState.selectedWorkerId] || [];
             
-            function stopPlayback() {
-                clearInterval(playbackInterval);
-                playbackInterval = null;
+            // Prepare data for charts
+            const allData = {
+                labels: workerData.map(d => d.time),
+                bpm: workerData.map(d => d.bpm),
+                spo2: workerData.map(d => d.spO2),
+                temp: workerData.map(d => d.temp),
+                stress: workerData.map(d => stressToNum(d.stress))
+            };
 
-                // Set UI to "paused" state
-                startButton.disabled = false;
-                stopButton.disabled = true;
-                liveDot.classList.add('paused');
-                liveText.textContent = 'Paused';
-                liveText.classList.add('text-gray-500');
-                liveText.classList.remove('text-green-600');
-            }
-            
-            function resetSimulation() {
-                stopPlayback();
+            // Create charts
+            charts.bpm = new Chart(elements.bpmChartCtx, {
+                type: 'line',
+                data: { labels: allData.labels, datasets: [{ data: allData.bpm, borderColor: '#3B82F6', tension: 0.1, fill: false, pointRadius: 2 }] },
+                options: commonOptions('BPM')
+            });
 
-                // Clear live data display
-                updateLiveUI({ bpm: '--', spO2: '--', temp: '--', lat: '--', lon: '--', stress: '--' });
+            charts.spo2 = new Chart(elements.spo2ChartCtx, {
+                type: 'line',
+                data: { labels: allData.labels, datasets: [{ data: allData.spo2, borderColor: '#10B981', tension: 0.1, fill: false, pointRadius: 2 }] },
+                options: spo2Options
+            });
 
-                // Clear simulation data buffer
-                simulationData[selectedWorkerId] = { heartRate: [], spO2: [], temp: [], stress: [] };
-                
-                // Clear charts
-                updateCharts();
-                locationDot.style.display = 'none';
-            }
-            
-            function updateLiveUI(dataPoint) {
-                liveBPM.textContent = dataPoint.bpm;
-                liveSpO2.textContent = dataPoint.spO2;
-                liveTemp.textContent = dataPoint.temp;
-                liveLat.textContent = dataPoint.lat;
-                liveLon.textContent = dataPoint.lon;
-                liveStress.textContent = dataPoint.stress;
+            charts.temp = new Chart(elements.tempChartCtx, {
+                type: 'line',
+                data: { labels: allData.labels, datasets: [{ data: allData.temp, borderColor: '#F59E0B', tension: 0.1, fill: false, pointRadius: 2 }] },
+                options: tempOptions
+            });
 
-                // Update stress color
-                liveStress.classList.remove('text-safety-green', 'text-safety-amber', 'text-safety-red', 'text-slate-800');
-                if (dataPoint.stress === "Low") {
-                    liveStress.classList.add('text-safety-green');
-                } else if (dataPoint.stress === "Medium") {
-                    liveStress.classList.add('text-safety-amber');
-                } else if (dataPoint.stress === "High") {
-                    liveStress.classList.add('text-safety-red');
-                } else {
-                    liveStress.classList.add('text-slate-800');
+            charts.stress = new Chart(elements.stressChartCtx, {
+                type: 'line',
+                data: { labels: allData.labels, datasets: [{ data: allData.stress, borderColor: '#6B7280', tension: 0.1, fill: false, stepped: true, pointRadius: 2 }] },
+                options: stressOptions
+            });
+        }
+        
+        /**
+         * Clears all charts and resets them to an empty state.
+         */
+        function clearCharts() {
+            Object.values(charts).forEach(chart => {
+                if(chart) {
+                    chart.data.labels = [];
+                    chart.data.datasets[0].data = [];
+                    chart.update();
                 }
-            }
-
-            function updateCharts() {
-                const playbackBuffer = simulationData[selectedWorkerId];
-
-                // Update BPM Chart
-                charts.bpm.data.labels = playbackBuffer.heartRate.map(d => d.x);
-                charts.bpm.data.datasets[0].data = playbackBuffer.heartRate.map(d => d.y);
-                charts.bpm.update('none'); // 'none' for no animation
-                
-                // Update SpO2 Chart
-                charts.spO2.data.labels = playbackBuffer.spO2.map(d => d.x);
-                charts.spO2.data.datasets[0].data = playbackBuffer.spO2.map(d => d.y);
-                charts.spO2.update('none');
-
-                // Update Temp Chart
-                charts.temp.data.labels = playbackBuffer.temp.map(d => d.x);
-                charts.temp.data.datasets[0].data = playbackBuffer.temp.map(d => d.y);
-                charts.temp.update('none');
-
-                // Update Stress Chart
-                charts.stress.data.labels = playbackBuffer.stress.map(d => d.x);
-                charts.stress.data.datasets[0].data = playbackBuffer.stress.map(d => d.y);
-                charts.stress.update('none');
-            }
-
-            function updateLocationMap(lat, lon) {
-                locationDot.style.display = 'block';
-
-                // Normalize coordinates to 0-100% for the map div
-                const { minLat, maxLat, minLon, maxLon } = mapBounds;
-                let percentX = ((lon - minLon) / (maxLon - minLon)) * 100;
-                let percentY = ((lat - minLat) / (maxLat - minLat)) * 100;
-
-                // Clamp to 0-100 to keep dot inside the box
-                percentX = Math.max(0, Math.min(100, percentX));
-                percentY = Math.max(0, Math.min(100, percentY));
-
-                // Apply style (invert Y-axis: 0% lat = 100% top)
-                locationDot.style.left = ${percentX}%;
-                locationDot.style.top = ${100 - percentY}%;
-            }
-            
-            // New function to load the full history for a worker onto the charts
-            function loadFullHistory(workerId) {
-                const workerData = fixedRecordedData[workerId];
-                const playbackBuffer = simulationData[workerId];
-                
-                // Clear any existing data
-                playbackBuffer.heartRate = [];
-                playbackBuffer.spO2 = [];
-                playbackBuffer.temp = [];
-                playbackBuffer.stress = [];
-
-                // Populate the buffer with all data
-                workerData.forEach(dataPoint => {
-                    playbackBuffer.heartRate.push({ x: dataPoint.time, y: dataPoint.bpm });
-                    playbackBuffer.spO2.push({ x: dataPoint.time, y: dataPoint.spO2 });
-                    playbackBuffer.temp.push({ x: dataPoint.time, y: dataPoint.temp });
-                    playbackBuffer.stress.push({ x: dataPoint.time, y: stressToNum(dataPoint.stress) });
-                });
-
-                // Update all charts
-                updateCharts();
-                
-                // Update UI to show the last known data point
-                const lastDataPoint = workerData[workerData.length - 1];
-                updateLiveUI(lastDataPoint);
-                updateLocationMap(lastDataPoint.lat, lastDataPoint.lon);
-            }
-
-            function switchWorker() {
-                resetSimulation(); // Stop playback and clear
-                selectedWorkerId = workerSelect.value;
-                selectedWorkerName = workerSelect.options[workerSelect.selectedIndex].text;
-                
-                dashboardTitle.textContent = Safety Dashboard: ${selectedWorkerName};
-                
-                // Load the full static history for the new worker
-                loadFullHistory(selectedWorkerId);
-            }
-            
-            function downloadData() {
-                // Download the complete, original fixed dataset
-                const dataStr = JSON.stringify(fixedRecordedData, null, 2);
-                const dataBlob = new Blob([dataStr], { type: 'application/json' });
-                const url = URL.createObjectURL(dataBlob);
-                
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = iot_fixed_worker_data_${new Date().toISOString().split('T')[0]}.json;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-            }
-
-            // === 6. EVENT LISTENERS ===
-            workerSelect.addEventListener('change', switchWorker);
-            startButton.addEventListener('click', startPlayback);
-            stopButton.addEventListener('click', resetSimulation);
-            downloadButton.addEventListener('click', downloadData);
-
-            // === 7. INITIALIZE APP ===
+            });
+            // Re-init empty charts
+            const originalWorkerId = currentState.selectedWorkerId;
+            currentState.selectedWorkerId = null; // Temporarily set to null
             initCharts();
-            loadFullHistory(selectedWorkerId); // Load initial worker's full history
+            currentState.selectedWorkerId = originalWorkerId; // Restore it
+        }
+
+        /**
+         * Updates the "Live Vitals" panel with the current data point.
+         */
+        function updateLiveVitals(data) {
+            if (!data) {
+                elements.liveBpm.textContent = '--';
+                elements.liveSpO2.textContent = '--';
+                elements.liveTemp.textContent = '--';
+                elements.liveStress.textContent = '--';
+                elements.liveLat.textContent = 'Lat: --';
+                elements.liveLon.textContent = 'Lon: --';
+                return;
+            }
+
+            elements.liveBpm.textContent = data.bpm;
+            elements.liveSpO2.textContent = data.spO2;
+            elements.liveTemp.textContent = data.temp.toFixed(1);
+            elements.liveStress.textContent = data.stress;
+            elements.liveLat.textContent = Lat: ${data.lat.toFixed(4)};
+            elements.liveLon.textContent = Lon: ${data.lon.toFixed(4)};
+            
+            // Update stress color
+            elements.liveStress.classList.remove('text-safe-green', 'text-warn-yellow', 'text-danger-red', 'text-slate-800');
+            if(data.stress === 'Low') elements.liveStress.classList.add('text-safe-green');
+            else if(data.stress === 'Medium') elements.liveStress.classList.add('text-warn-yellow');
+            else if(data.stress === 'High') elements.liveStress.classList.add('text-danger-red');
+            else elements.liveStress.classList.add('text-slate-800');
+
+            updateLocationDot(data.lat, data.lon);
+        }
+
+        /**
+         * Updates the position of the dot on the simulated map.
+         */
+        function updateLocationDot(lat, lon) {
+            const { minLat, maxLat, minLon, maxLon } = mapBounds;
+            
+            // Normalize coordinates to a 0-1 percentage
+            const percentX = (lon - minLon) / (maxLon - minLon);
+            const percentY = (lat - maxLat) / (minLat - maxLat); // Inverted Y-axis
+
+            // Convert percentage to pixel position within the map container
+            const mapRect = elements.mapContainer.getBoundingClientRect();
+            const left = percentX * mapRect.width;
+            const top = percentY * mapRect.height;
+
+            // Set position (clamped to stay within bounds)
+            elements.locationDot.style.left = ${Math.max(8, Math.min(left, mapRect.width - 8))}px;
+            elements.locationDot.style.top = ${Math.max(8, Math.min(top, mapRect.height - 8))}px;
+        }
+
+
+        /**
+         * Runs one "tick" of the simulation.
+         */
+        function simulationTick() {
+            const data = fixedRecordedData[currentState.selectedWorkerId];
+            if (!data) {
+                stopSimulation();
+                return;
+            }
+
+            const currentData = data[currentState.currentDataIndex];
+            updateLiveVitals(currentData);
+            
+            // Highlight the current point on the charts
+            Object.values(charts).forEach(chart => {
+                chart.setActiveElements([{ datasetIndex: 0, index: currentState.currentDataIndex }]);
+                chart.tooltip.setActiveElements([{ datasetIndex: 0, index: currentState.currentDataIndex }]);
+                chart.update();
+            });
+
+
+            // Move to the next data point
+            currentState.currentDataIndex++;
+            if (currentState.currentDataIndex >= data.length) {
+                stopSimulation(); // End of data
+            }
+        }
+
+        /**
+         * Starts the data playback simulation.
+         */
+        function startSimulation() {
+            if (currentState.isPlaying || !currentState.selectedWorkerId) return;
+
+            const data = fixedRecordedData[currentState.selectedWorkerId];
+            if (!data || data.length === 0) return;
+
+            currentState.isPlaying = true;
+            currentState.currentDataIndex = 0; // Start from the beginning
+            
+            // Update UI
+            elements.playButton.disabled = true;
+            elements.stopButton.disabled = false;
+            elements.workerSelect.disabled = true;
+            elements.statusText.textContent = 'Playing...';
+            elements.statusIndicator.classList.remove('bg-slate-400', 'bg-warn-yellow');
+            elements.statusIndicator.classList.add('bg-safe-green');
+
+            // Start the interval
+            simulationTick(); // Run first tick immediately
+            currentState.simulationInterval = setInterval(simulationTick, 2000); // Tick every 2 seconds
+        }
+
+        /**
+         * Stops the simulation and resets the state.
+         */
+        function stopSimulation() {
+            clearInterval(currentState.simulationInterval);
+            currentState.simulationInterval = null;
+            currentState.isPlaying = false;
+            currentState.currentDataIndex = 0;
+
+            // Reset UI
+            elements.playButton.disabled = (currentState.selectedWorkerId === null);
+            elements.stopButton.disabled = true;
+            elements.workerSelect.disabled = false;
+            elements.statusText.textContent = 'Paused';
+            elements.statusIndicator.classList.remove('bg-safe-green', 'bg-warn-yellow');
+            elements.statusIndicator.classList.add('bg-slate-400');
+
+            updateLiveVitals(null); // Clear vitals
+            
+            // Remove highlights from charts
+            Object.values(charts).forEach(chart => {
+                if (chart) {
+                    chart.setActiveElements([]);
+                    chart.tooltip.setActiveElements([]);
+                    chart.update();
+                }
+            });
+            elements.locationDot.style.left = '50%';
+            elements.locationDot.style.top = '50%';
+        }
+
+
+        // === 4. EVENT HANDLERS ===
+
+        /**
+         * Handles the user changing the worker selection.
+         */
+        function handleWorkerSelect(event) {
+            const workerId = event.target.value;
+            stopSimulation(); // Stop any active simulation
+
+            if (workerId) {
+                currentState.selectedWorkerId = workerId;
+                elements.playButton.disabled = false;
+                initCharts(); // Load the full history for this worker
+                
+                // Show first data point in live view
+                const firstData = fixedRecordedData[workerId][0];
+                updateLiveVitals(firstData);
+            } else {
+                currentState.selectedWorkerId = null;
+                elements.playButton.disabled = true;
+                clearCharts();
+                updateLiveVitals(null);
+            }
+        }
+
+        /**
+         * Handles the download data button click.
+         */
+        function handleDownloadData() {
+            const dataStr = JSON.stringify(fixedRecordedData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'worker_safety_dataset.json';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        // === 5. INITIALIZATION ===
+        
+        /**
+         * This main function runs once the HTML document is fully loaded.
+         */
+        document.addEventListener('DOMContentLoaded', () => {
+            // Cache DOM elements
+            elements = {
+                workerSelect: document.getElementById('workerSelect'),
+                playButton: document.getElementById('playButton'),
+                stopButton: document.getElementById('stopButton'),
+                downloadButton: document.getElementById('downloadButton'),
+                statusText: document.getElementById('statusText'),
+                statusIndicator: document.getElementById('statusIndicator'),
+                liveBpm: document.getElementById('liveBpm'),
+                liveSpO2: document.getElementById('liveSpO2'),
+                liveTemp: document.getElementById('liveTemp'),
+                liveStress: document.getElementById('liveStress'),
+                liveLat: document.getElementById('liveLat'),
+                liveLon: document.getElementById('liveLon'),
+                mapContainer: document.querySelector('.map-container'),
+                locationDot: document.getElementById('locationDot'),
+                bpmChartCtx: document.getElementById('bpmChart').getContext('2d'),
+                spo2ChartCtx: document.getElementById('spo2Chart').getContext('2d'),
+                tempChartCtx: document.getElementById('tempChart').getContext('2d'),
+                stressChartCtx: document.getElementById('stressChart').getContext('2d')
+            };
+
+            // Set up initial state
+            initCharts();
+
+            // Attach event listeners
+            elements.workerSelect.addEventListener('change', handleWorkerSelect);
+            elements.playButton.addEventListener('click', startSimulation);
+            elements.stopButton.addEventListener('click', stopSimulation);
+            elements.downloadButton.addEventListener('click', handleDownloadData);
         });
+
     </script>
 </body>
 </html>
