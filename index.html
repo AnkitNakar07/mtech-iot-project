@@ -249,7 +249,7 @@
                 { time: "2024-11-23 09:00:22", bpm: 82, spO2: 98, temp: 36.7, stress: "Low", lat: 22.3247, lon: 70.0138 },
                 { time: "2024-11-23 09:00:24", bpm: 80, spO2: 99, temp: 36.7, stress: "Low", lat: 22.3248, lon: 70.0138 },
                 { time: "2024-11-23 09:00:26", bpm: 79, spO2: 99, temp: 36.7, stress: "Low", lat: 22.3248, lon: 70.0139 },
-                { time: "2024-11-23 09:00:28", bpm: 78, spO2: 99, temp: 36.6, stress: "Low", lat: 22.3249, lon: 70.0139 },
+                { time: "2024-1Two-thirds of the file. -23 09:00:28", bpm: 78, spO2: 99, temp: 36.6, stress: "Low", lat: 22.3249, lon: 70.0139 },
                 { time: "2024-11-23 09:00:30", bpm: 76, spO2: 98, temp: 36.6, stress: "Low", lat: 22.3249, lon: 70.0140 }
             ],
             'worker-002': [
@@ -621,7 +621,7 @@
                 
                 // Show first data point in live view
                 const firstData = fixedRecordedData[workerId][0];
-                // *** THIS WAS THE SECOND BUG: updateLiveVVitals -> updateLiveVitals ***
+                // *** THIS IS THE FINAL FIX: updateLiveVVitals -> updateLiveVitals ***
                 updateLiveVitals(firstData);
             } else {
                 currentState.selectedWorkerId = null;
@@ -654,7 +654,7 @@
          */
         document.addEventListener('DOMContentLoaded', () => {
             // Cache DOM elements
-            // *** THIS WAS THE FIRST BUG: Added missing commas ***
+            // *** THIS IS THE FINAL FIX: Added missing commas ***
             elements = {
                 workerSelect: document.getElementById('workerSelect'),
                 playButton: document.getElementById('playButton'),
