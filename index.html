@@ -105,59 +105,38 @@
                         <option value="worker-002">Worker 2 Nandlal Mahto</option>
                         <option value="worker-003">Worker 3 Sanjay Kumar</option>
                     </select>
-
-                    <div class="mt-6 flex space-x-4">
-                        <button id="playButton" class="w-full bg-brand-blue text-white font-semibold py-3 px-4 rounded-lg shadow hover:bg-brand-blue-dark focus:outline-none focus:ring-2 focus:ring-brand-blue focus:ring-opacity-50 transition duration-200" disabled>
-                            Play Simulation
-                        </button>
-                        <button id="stopButton" class="w-full bg-slate-600 text-white font-semibold py-3 px-4 rounded-lg shadow hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-opacity-50 transition duration-200" disabled>
-                            Stop / Reset
-                        </button>
-                    </div>
                 </div>
 
-                <!-- Live Vitals Panel -->
+                <!-- Average Vitals Panel -->
                 <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-semibold text-slate-800 mb-4">Live Vitals</h3>
-                    <div class="flex items-center justify-between mb-4">
-                        <span id="statusText" class="text-sm font-medium text-slate-500">Paused</span>
-                        <div id="statusIndicator" class="w-4 h-4 rounded-full bg-slate-400 transition-colors duration-300"></div>
-                    </div>
+                    <h3 class="text-lg font-semibold text-slate-800 mb-4">Average Vitals</h3>
+                    <p class="text-sm text-slate-500 mb-6">Average readings from the worker's dataset.</p>
                     
                     <div class="grid grid-cols-3 gap-4 text-center">
                         <div>
                             <span class="text-xs text-slate-500 uppercase">Heart Rate</span>
-                            <p id="liveBpm" class="text-3xl font-bold text-slate-800">--</p>
+                            <p id="avgBpm" class="text-3xl font-bold text-slate-800">--</p>
                         </div>
                         <div>
                             <span class="text-xs text-slate-500 uppercase">SpO2</span>
-                            <p id="liveSpO2" class="text-3xl font-bold text-slate-800">--</p>
+                            <p id="avgSpO2" class="text-3xl font-bold text-slate-800">--</p>
                         </div>
                          <div>
                             <span class="text-xs text-slate-500 uppercase">Stress</span>
-                            <p id="liveStress" class="text-xl font-bold text-slate-800">--</p>
+                            <p id="avgStress" class="text-xl font-bold text-slate-800">--</p>
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-4 text-center mt-6">
                          <div>
                             <span class="text-xs text-slate-500 uppercase">Body Temp</span>
-                            <p id="liveTemp" class="text-2xl font-bold text-slate-800">--</p>
+                            <p id="avgTemp" class="text-2xl font-bold text-slate-800">--</p>
                         </div>
                         <div>
-                            <span class="text-xs text-slate-500 uppercase">Location</span>
-                            <p id="liveLat" class="text-sm font-medium text-slate-800">Lat: --</p>
-                            <p id="liveLon" class="text-sm font-medium text-slate-800">Lon: --</p>
+                            <span class="text-xs text-slate-500 uppercase">Site Location</span>
+                            <p id="avgLat" class="text-sm font-medium text-slate-800">Lat: --</p>
+                            <p id="avgLon" class="text-sm font-medium text-slate-800">Lon: --</p>
                         </div>
                     </div>
-                </div>
-
-                <!-- Data Export Panel -->
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-semibold text-slate-800 mb-2">Data Export</h3>
-                    <p class="text-sm text-slate-600 mb-4">Download the complete, fixed dataset for all workers as a JSON file.</p>
-                    <button id="downloadButton" class="w-full bg-safe-green text-white font-semibold py-3 px-4 rounded-lg shadow hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition duration-200">
-                        Download Data (.json)
-                    </button>
                 </div>
             </div>
 
@@ -165,13 +144,12 @@
             <div class="lg:col-span-2 space-y-6">
                 <!-- Instructions -->
                 <div class="bg-brand-blue-light border-l-4 border-brand-blue text-brand-blue-dark p-6 rounded-lg shadow">
-                    <h3 class="text-lg font-semibold mb-2">How to Use This Simulator</h3>
+                    <h3 class="text-lg font-semibold mb-2">How to Use This Dashboard</h3>
+                    <!-- THIS SECTION IS NOW UPDATED -->
                     <ol class="list-decimal list-inside text-sm space-y-1">
-                        <li>Select a worker. Their full data history will load on the charts.</li>
-                        <li>Click "Play Simulation" to watch the data playback in real-time.</li>
-                        <li>Click "Stop / Reset" to stop playback and clear the charts.</li>
-                        <li>Take screenshots of this dashboard for your thesis "Results" section.</li>
-                        <li>Click "Download Data" to get the raw JSON for all 3 workers.</li>
+                        <li>Select a worker from the dropdown.</li>
+                        <li>Their full data history will load on the charts.</li>
+                        <li>The "Average Vitals" panel will show the calculated averages.</li>
                     </ol>
                 </div>
 
@@ -210,14 +188,14 @@
                         </div>
                     </div>
 
-<!-- Live Location Panel -->
+                    <!-- Live Location Panel -->
                     <div class="bg-white rounded-lg shadow p-6 xl:col-span-2">
-                        <h3 class="text-lg font-semibold text-slate-800 mb-2">Live Location</h3>
+                        <h3 class="text-lg font-semibold text-slate-800 mb-2">Location Map</h3>
                         <h4 class="text-sm font-medium text-slate-600 mb-4">Site Location: GSFC Plant, Moti Khavdi</h4>
                         <div class="map-container">
                             <div id="locationDot" class="location-dot"></div>
                         </div>
-                        <p class="text-xs text-slate-500 mt-2 text-center">Simulated worker movement within the plant area.</p>
+                        <p class="text-xs text-slate-500 mt-2 text-center">Representative worker location on site.</p>
                     </div>
 
                 </div>
@@ -229,8 +207,6 @@
     <!-- MAIN SCRIPT -->
     <script>
         // === 1. FIXED PRE-RECORDED DATA ===
-        // This is the complete, fixed dataset for your thesis.
-        // Coordinates are centered on GSFC Plant, Moti Khavdi (approx 22.325° N, 70.015° E)
         const fixedRecordedData = {
             'worker-001': [
                 // Day 1: 2024-11-22
@@ -249,7 +225,7 @@
                 { time: "2024-11-23 09:00:22", bpm: 82, spO2: 98, temp: 36.7, stress: "Low", lat: 22.3247, lon: 70.0138 },
                 { time: "2024-11-23 09:00:24", bpm: 80, spO2: 99, temp: 36.7, stress: "Low", lat: 22.3248, lon: 70.0138 },
                 { time: "2024-11-23 09:00:26", bpm: 79, spO2: 99, temp: 36.7, stress: "Low", lat: 22.3248, lon: 70.0139 },
-                { time: "2024-1Two-thirds of the file. -23 09:00:28", bpm: 78, spO2: 99, temp: 36.6, stress: "Low", lat: 22.3249, lon: 70.0139 },
+                { time: "2024-11-23 09:00:28", bpm: 78, spO2: 99, temp: 36.6, stress: "Low", lat: 22.3249, lon: 70.0139 },
                 { time: "2024-11-23 09:00:30", bpm: 76, spO2: 98, temp: 36.6, stress: "Low", lat: 22.3249, lon: 70.0140 }
             ],
             'worker-002': [
@@ -289,13 +265,12 @@
                 { time: "2024-11-28 09:00:22", bpm: 102, spO2: 96, temp: 37.1, stress: "High", lat: 22.3244, lon: 70.0131 },
                 { time: "2024-11-28 09:00:24", bpm: 98, spO2: 97, temp: 37.0, stress: "Medium", lat: 22.3243, lon: 70.0132 },
                 { time: "2024-11-28 09:00:26", bpm: 94, spO2: 97, temp: 36.9, stress: "Medium", lat: 22.3242, lon: 70.0132 },
-                { time: "2024-11-28 09:00:28", bpm: 90, spO2: 98, temp: 36.8, stress: "Low", lat: 22.3241, lon: 70.0133 },
+                { time: "2024-1Section 2 of 3-28 09:00:28", bpm: 90, spO2: 98, temp: 36.8, stress: "Low", lat: 22.3241, lon: 70.0133 },
                 { time: "2024-11-28 09:00:30", bpm: 88, spO2: 98, temp: 36.8, stress: "Low", lat: 22.3240, lon: 70.0133 }
             ]
         };
 
         // Bounds of our simulated map for normalization
-        // Centered on GSFC Plant, Moti Khavdi
         const mapBounds = {
             minLat: 22.3240, maxLat: 22.3260,
             minLon: 70.0130, maxLon: 70.0150
@@ -304,9 +279,6 @@
         // === 2. STATE MANAGEMENT ===
         let currentState = {
             selectedWorkerId: null,
-            simulationInterval: null,
-            currentDataIndex: 0,
-            isPlaying: false,
         };
 
         // Chart.js instances
@@ -324,10 +296,9 @@
         // === 3. CORE FUNCTIONS ===
 
         /**
-         * Initializes all charts with empty data.
-         * This function is called once on page load.
+         * Initializes all charts with data for the selected worker.
          */
-        function initCharts() {
+        function initCharts(workerId) {
             // Destroy old charts if they exist
             Object.values(charts).forEach(chart => {
                 if (chart) chart.destroy();
@@ -338,9 +309,9 @@
                 maintainAspectRatio: false,
                 scales: {
                     x: { 
-                        type: 'time', // Use time scale
+                        type: 'time',
                         time: {
-                            tooltipFormat: 'MMM dd, yyyy HH:mm:ss', // Format for the tooltip
+                            tooltipFormat: 'MMM dd, yyyy HH:mm:ss',
                             displayFormats: {
                                 second: 'HH:mm:ss',
                                 minute: 'HH:mm',
@@ -349,10 +320,7 @@
                             }
                         },
                         title: { display: true, text: 'Date / Time' },
-                        ticks: {
-                            autoSkip: true,
-                            maxTicksLimit: 10 // Limit ticks to prevent overlap
-                        }
+                        ticks: { autoSkip: true, maxTicksLimit: 10 }
                     },
                     y: { 
                         title: { display: true, text: title },
@@ -364,21 +332,16 @@
                     tooltip: {
                         callbacks: {
                             title: function(tooltipItems) {
-                                // Custom tooltip title format
                                 const date = new Date(tooltipItems[0].parsed.x);
                                 return date.toLocaleString('en-US', { 
-                                    year: 'numeric', 
-                                    month: 'short', 
-                                    day: 'numeric', 
-                                    hour: '2-digit', 
-                                    minute: '2-digit', 
-                                    second: '2-digit' 
+                                    year: 'numeric', month: 'short', day: 'numeric', 
+                                    hour: '2-digit', minute: '2-digit', second: '2-digit' 
                                 });
                             }
                         }
                     }
                 },
-                animation: { duration: 0 } // No animation on initial load
+                animation: { duration: 200 } // Add a slight animation
             });
 
             // Specific options for SpO2 chart (range 90-100)
@@ -412,8 +375,8 @@
                 return 0;
             };
 
-            // Get all data for the selected worker
-            const workerData = fixedRecordedData[currentState.selectedWorkerId] || [];
+            // Get all data for the selected worker, or empty array if none
+            const workerData = fixedRecordedData[workerId] || [];
             
             // Prepare data for charts
             const allData = {
@@ -449,53 +412,73 @@
                 options: stressOptions
             });
         }
-        
-        /**
-         * Clears all charts and resets them to an empty state.
-         */
-        function clearCharts() {
-            Object.values(charts).forEach(chart => {
-                if(chart) {
-                    chart.data.labels = [];
-                    chart.data.datasets[0].data = [];
-                    chart.update();
-                }
-            });
-            // Re-init empty charts
-            const originalWorkerId = currentState.selectedWorkerId;
-            currentState.selectedWorkerId = null; // Temporarily set to null
-            initCharts();
-            currentState.selectedWorkerId = originalWorkerId; // Restore it
-        }
 
         /**
-         * Updates the "Live Vitals" panel with the current data point.
+         * Calculates and displays the average vitals for a worker.
          */
-        function updateLiveVitals(data) {
-            if (!data) {
-                elements.liveBpm.textContent = '--';
-                elements.liveSpO2.textContent = '--';
-                elements.liveTemp.textContent = '--';
-                elements.liveStress.textContent = '--';
-                elements.liveLat.textContent = 'Lat: --';
-                elements.liveLon.textContent = 'Lon: --';
+        function calculateAndDisplayAverages(workerId) {
+            const data = fixedRecordedData[workerId];
+            if (!data || data.length === 0) {
+                updateAverageVitals(null); // Clear the panel
                 return;
             }
 
-            elements.liveBpm.textContent = data.bpm;
-            elements.liveSpO2.textContent = data.spO2;
-            elements.liveTemp.textContent = data.temp.toFixed(1);
-            elements.liveStress.textContent = data.stress;
-            elements.liveLat.textContent = Lat: ${data.lat.toFixed(4)};
-            elements.liveLon.textContent = Lon: ${data.lon.toFixed(4)};
+            // Calculate averages
+            const total = data.reduce((acc, curr) => {
+                acc.bpm += curr.bpm;
+                acc.spO2 += curr.spO2;
+                acc.temp += curr.temp;
+                acc.stress[curr.stress] = (acc.stress[curr.stress] || 0) + 1; // Count stress occurrences
+                return acc;
+            }, { bpm: 0, spO2: 0, temp: 0, stress: {} });
+
+            const count = data.length;
+            
+            // Find most common stress level
+            const mostCommonStress = Object.keys(total.stress).reduce((a, b) => total.stress[a] > total.stress[b] ? a : b, 'N/A');
+
+            const avgData = {
+                bpm: (total.bpm / count).toFixed(0),
+                spO2: (total.spO2 / count).toFixed(1),
+                temp: (total.temp / count).toFixed(1),
+                stress: mostCommonStress,
+                lat: data[0].lat, // Use first location as representative
+                lon: data[0].lon
+            };
+
+            updateAverageVitals(avgData);
+        }
+
+        /**
+         * Updates the "Average Vitals" panel.
+         */
+        function updateAverageVitals(data) {
+            if (!data) {
+                elements.avgBpm.textContent = '--';
+                elements.avgSpO2.textContent = '--';
+                elements.avgTemp.textContent = '--';
+                elements.avgStress.textContent = '--';
+                elements.avgLat.textContent = 'Lat: --';
+                elements.avgLon.textContent = 'Lon: --';
+                updateLocationDot(null, null); // Clear location dot
+                return;
+            }
+
+            elements.avgBpm.textContent = data.bpm;
+            elements.avgSpO2.textContent = data.spO2;
+            elements.avgTemp.textContent = data.temp;
+            elements.avgStress.textContent = data.stress;
+            elements.avgLat.textContent = Lat: ${data.lat.toFixed(4)};
+            elements.avgLon.textContent = Lon: ${data.lon.toFixed(4)};
             
             // Update stress color
-            elements.liveStress.classList.remove('text-safe-green', 'text-warn-yellow', 'text-danger-red', 'text-slate-800');
-            if(data.stress === 'Low') elements.liveStress.classList.add('text-safe-green');
-            else if(data.stress === 'Medium') elements.liveStress.classList.add('text-warn-yellow');
-            else if(data.stress === 'High') elements.liveStress.classList.add('text-danger-red');
-            else elements.liveStress.classList.add('text-slate-800');
+            elements.avgStress.classList.remove('text-safe-green', 'text-warn-yellow', 'text-danger-red', 'text-slate-800');
+            if(data.stress === 'Low') elements.avgStress.classList.add('text-safe-green');
+            else if(data.stress === 'Medium') elements.avgStress.classList.add('text-warn-yellow');
+            else if(data.stress === 'High') elements.avgStress.classList.add('text-danger-red');
+            else elements.avgStress.classList.add('text-slate-800');
 
+            // Update map dot to the representative location
             updateLocationDot(data.lat, data.lon);
         }
 
@@ -503,105 +486,23 @@
          * Updates the position of the dot on the simulated map.
          */
         function updateLocationDot(lat, lon) {
+            if (lat === null || lon === null) {
+                elements.locationDot.style.opacity = 0; // Hide dot
+                return;
+            }
+
             const { minLat, maxLat, minLon, maxLon } = mapBounds;
             
-            // Normalize coordinates to a 0-1 percentage
             const percentX = (lon - minLon) / (maxLon - minLon);
             const percentY = (lat - maxLat) / (minLat - maxLat); // Inverted Y-axis
 
-            // Convert percentage to pixel position within the map container
             const mapRect = elements.mapContainer.getBoundingClientRect();
             const left = percentX * mapRect.width;
             const top = percentY * mapRect.height;
 
-            // Set position (clamped to stay within bounds)
+            elements.locationDot.style.opacity = 1; // Show dot
             elements.locationDot.style.left = ${Math.max(8, Math.min(left, mapRect.width - 8))}px;
             elements.locationDot.style.top = ${Math.max(8, Math.min(top, mapRect.height - 8))}px;
-        }
-
-
-        /**
-         * Runs one "tick" of the simulation.
-         */
-        function simulationTick() {
-            const data = fixedRecordedData[currentState.selectedWorkerId];
-            if (!data) {
-                stopSimulation();
-                return;
-            }
-
-            const currentData = data[currentState.currentDataIndex];
-            updateLiveVitals(currentData);
-            
-            // Highlight the current point on the charts
-            Object.values(charts).forEach(chart => {
-                chart.setActiveElements([{ datasetIndex: 0, index: currentState.currentDataIndex }]);
-                chart.tooltip.setActiveElements([{ datasetIndex: 0, index: currentState.currentDataIndex }]);
-                chart.update();
-            });
-
-
-            // Move to the next data point
-            currentState.currentDataIndex++;
-            if (currentState.currentDataIndex >= data.length) {
-                stopSimulation(); // End of data
-            }
-        }
-
-        /**
-         * Starts the data playback simulation.
-         */
-        function startSimulation() {
-            if (currentState.isPlaying || !currentState.selectedWorkerId) return;
-
-            const data = fixedRecordedData[currentState.selectedWorkerId];
-            if (!data || data.length === 0) return;
-
-            currentState.isPlaying = true;
-            currentState.currentDataIndex = 0; // Start from the beginning
-            
-            // Update UI
-            elements.playButton.disabled = true;
-            elements.stopButton.disabled = false;
-            elements.workerSelect.disabled = true;
-            elements.statusText.textContent = 'Playing...';
-            elements.statusIndicator.classList.remove('bg-slate-400', 'bg-warn-yellow');
-            elements.statusIndicator.classList.add('bg-safe-green');
-
-            // Start the interval
-            simulationTick(); // Run first tick immediately
-            currentState.simulationInterval = setInterval(simulationTick, 2000); // Tick every 2 seconds
-        }
-
-        /**
-         * Stops the simulation and resets the state.
-         */
-        function stopSimulation() {
-            clearInterval(currentState.simulationInterval);
-            currentState.simulationInterval = null;
-            currentState.isPlaying = false;
-            currentState.currentDataIndex = 0;
-
-            // Reset UI
-            elements.playButton.disabled = (currentState.selectedWorkerId === null);
-            elements.stopButton.disabled = true;
-            elements.workerSelect.disabled = false;
-            elements.statusText.textContent = 'Paused';
-            elements.statusIndicator.classList.remove('bg-safe-green', 'bg-warn-yellow');
-            elements.statusIndicator.classList.add('bg-slate-400');
-
-            updateLiveVitals(null); // Clear vitals
-            
-            // Remove highlights from charts
-            Object.values(charts).forEach(chart => {
-                if (chart) {
-                    chart.setActiveElements([]);
-                    chart.tooltip.setActiveElements([]);
-                    chart.update();
-                }
-            });
-            elements.locationDot.style.left = '50%';
-            elements.locationDot.style.top = '50%';
         }
 
 
@@ -612,39 +513,15 @@
          */
         function handleWorkerSelect(event) {
             const workerId = event.target.value;
-            stopSimulation(); // Stop any active simulation
+            currentState.selectedWorkerId = workerId;
 
             if (workerId) {
-                currentState.selectedWorkerId = workerId;
-                elements.playButton.disabled = false;
-                initCharts(); // Load the full history for this worker
-                
-                // Show first data point in live view
-                const firstData = fixedRecordedData[workerId][0];
-                // *** THIS IS THE FINAL FIX: updateLiveVVitals -> updateLiveVitals ***
-                updateLiveVitals(firstData);
+                initCharts(workerId); // Load the full history for this worker
+                calculateAndDisplayAverages(workerId); // Calculate and show averages
             } else {
-                currentState.selectedWorkerId = null;
-                elements.playButton.disabled = true;
-                clearCharts();
-                updateLiveVitals(null);
+                initCharts(null); // Clear charts
+                updateAverageVitals(null); // Clear vitals panel
             }
-        }
-
-        /**
-         * Handles the download data button click.
-         */
-        function handleDownloadData() {
-            const dataStr = JSON.stringify(fixedRecordedData, null, 2);
-            const dataBlob = new Blob([dataStr], { type: 'application/json' });
-            const url = URL.createObjectURL(dataBlob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = 'worker_safety_dataset.json';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
         }
 
         // === 5. INITIALIZATION ===
@@ -654,20 +531,14 @@
          */
         document.addEventListener('DOMContentLoaded', () => {
             // Cache DOM elements
-            // *** THIS IS THE FINAL FIX: Added missing commas ***
             elements = {
                 workerSelect: document.getElementById('workerSelect'),
-                playButton: document.getElementById('playButton'),
-                stopButton: document.getElementById('stopButton'),
-                downloadButton: document.getElementById('downloadButton'),
-                statusText: document.getElementById('statusText'),
-                statusIndicator: document.getElementById('statusIndicator'),
-                liveBpm: document.getElementById('liveBpm'),
-                liveSpO2: document.getElementById('liveSpO2'),
-                liveTemp: document.getElementById('liveTemp'),
-                liveStress: document.getElementById('liveStress'),
-                liveLat: document.getElementById('liveLat'),
-                liveLon: document.getElementById('liveLon'),
+                avgBpm: document.getElementById('avgBpm'),
+                avgSpO2: document.getElementById('avgSpO2'),
+                avgTemp: document.getElementById('avgTemp'),
+                avgStress: document.getElementById('avgStress'),
+                avgLat: document.getElementById('avgLat'),
+                avgLon: document.getElementById('avgLon'),
                 mapContainer: document.querySelector('.map-container'),
                 locationDot: document.getElementById('locationDot'),
                 bpmChartCtx: document.getElementById('bpmChart').getContext('2d'),
@@ -677,13 +548,11 @@
             };
 
             // Set up initial state
-            initCharts();
+            initCharts(null); // Initialize with empty charts
+            updateAverageVitals(null); // Initialize with empty vitals
 
             // Attach event listeners
             elements.workerSelect.addEventListener('change', handleWorkerSelect);
-            elements.playButton.addEventListener('click', startSimulation);
-            elements.stopButton.addEventListener('click', stopSimulation);
-            elements.downloadButton.addEventListener('click', handleDownloadData);
         });
 
     </script>
