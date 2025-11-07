@@ -5,558 +5,388 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Workplace Safety IoT Dashboard</title>
     
-    <!-- 1. Load Tailwind CSS (For styling) -->
+    <!-- 1. Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- 2. Load Chart.js (For charts) -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <!-- 3. Load Date Libraries (For time series plotting) -->
-    <script src="https://cdn.jsdelivr.net/npm/date-fns@2.29.3/cdn.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'brand-blue': '#005A9C',
-                        'brand-blue-dark': '#003E6B',
-                        'brand-blue-light': '#E6F0F6',
-                        'safe-green': '#10B981',
-                        'warn-yellow': '#F59E0B',
-                        'danger-red': '#EF4444',
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                },
-            },
-        }
-    </script>
+    <!-- 2. Add the CSS styles -->
     <style>
-        /* Custom map container styles */
-        .map-container {
-            position: relative;
-            width: 100%;
-            height: 200px;
-            background-color: #E2E8F0;
-            border-radius: 0.5rem;
-            border: 2px dashed #94A3B8;
-            overflow: hidden;
-            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
-            background-image: 
-                linear-gradient(to right, #CBD5E1 1px, transparent 1px),
-                linear-gradient(to bottom, #CBD5E1 1px, transparent 1px);
-            background-size: 20px 20px;
+        /* Import Google Font */
+        @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap");
+
+        /* Main Body Styling */
+        body {
+            background-color: #F3F4F6; /* Tailwind gray-100 equivalent */
+            font-family: "Inter", sans-serif;
         }
 
-        .location-dot {
-            position: absolute;
-            width: 16px;
-            height: 16px;
-            background-color: #EF4444;
-            border-radius: 50%;
-            border: 2px solid #FFFFFF;
-            box-shadow: 0 0 8px 2px #EF4444;
-            transform: translate(-50%, -50%);
+        /* Data Table Header (NEW DARK STYLE) */
+        .data-table th {
+            background-color: #1F2937; /* Dark Gray */
+            color: #FFFFFF;
+            font-weight: 600;
+            text-align: left;
+            padding: 12px 16px;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
-        /* Chart container to enforce aspect ratio */
-        .chart-container {
-            position: relative;
-            height: 300px;
-            width: 100%;
+        /* Data Table Cells */
+        .data-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #E5E7EB; /* Tailwind gray-200 equivalent */
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        /* Stress Pills */
+        .stress-low, .stress-medium, .stress-high {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 9999px; /* Full rounded */
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+        .stress-low {
+            background-color: #D1FAE5; /* Light green */
+            color: #065F46; /* Dark green */
+        }
+        .stress-medium {
+            background-color: #FEF3C7; /* Lighter yellow */
+            color: #92400E; /* Dark orange */
+        }
+        .stress-high {
+            background-color: #FEE2E2; /* Light red */
+            color: #991B1B; /* Dark red */
+        }
+
+        /* Data Table Header (for the main heading above the table) */
+        .data-header {
+            background-color: #FFFFFF; /* White background for this header */
+            border-bottom: 1px solid #E5E7EB; /* Light gray border */
+            padding: 1rem 1.5rem; /* Padding to match other sections */
         }
     </style>
 </head>
+<body class="bg-gray-100 font-sans antialiased">
 
-<body class="bg-slate-100 font-sans antialiased">
-
-    <!-- Header -->
-    <header class="bg-brand-blue shadow-md">
+    <!-- 3. Add the HTML body -->
+    <!-- New Attractive Header -->
+    <header class="bg-gradient-to-r from-blue-600 to-blue-800 shadow-lg">
         <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <div class="flex items-center">
-                    <span class="text-white text-xl font-bold">IoT Workplace Safety Simulator</span>
+            <div class="flex items-center justify-between h-20"> <!-- Made header taller -->
+                <div class="flex items-center space-x-4">
+                    <!-- New Shield Icon -->
+                    <svg class="h-10 w-10 text-white opacity-90" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.333 9-6.03 9-11.623 0-1.31-.21-2.571-.598-3.751A11.959 11.959 0 0112 2.714z" />
+                    </svg>
+                    <span class="text-white text-2xl font-bold">IoT Workplace Safety Dashboard</span>
                 </div>
-                <div class="text-white text-sm">
-                    M.Tech Thesis Project
-                </div>
+                <span class="text-white text-sm font-medium opacity-80">M.Tech Thesis Project</span>
             </div>
         </nav>
     </header>
 
-    <!-- Main Content Grid -->
     <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="space-y-8">
 
-            <!-- Left Panel: Controls -->
-            <div class="lg:col-span-1 space-y-6">
-                
-                <!-- Worker Selection -->
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-semibold text-slate-800 mb-4">Select Worker Device</h3>
-                    <select id="workerSelect" class="w-full p-3 border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-blue">
-                        <option value="">-- Select a Worker --</option>
-                        <option value="worker-001">Worker 1 Ramesh kumar</option>
-                        <option value="worker-002">Worker 2 Nandlal Mahto</option>
-                        <option value="worker-003">Worker 3 Sanjay Kumar</option>
-                    </select>
+            <!-- Worker Selection Dropdown -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <label for="workerSelect" class="block text-lg font-semibold text-gray-800 mb-4">Select Worker</label>
+                <select id="workerSelect" class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-600">
+                    <option value="">-- Show All Workers --</option>
+                    <option value="worker-001">Worker 1 Ramesh kumar</option>
+                    <option value="worker-002">Worker 2 Nandlal Mahto</option>
+                    <option value="worker-003">Worker 3 Sanjay Kumar</option>
+                </select>
+            </div>
+
+            <!-- NEW Colorful Vitals Section -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <!-- Heart Rate -->
+                <div class="bg-red-50 rounded-lg shadow p-6 flex flex-col justify-between">
+                    <div class="flex items-center space-x-2 text-red-700 font-semibold text-sm uppercase">
+                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                        </svg>
+                        <span>Avg. Heart Rate</span>
+                    </div>
+                    <div id="avgBPM" class="text-red-600 text-4xl font-bold mt-2">--</div>
                 </div>
-
-                <!-- Average Vitals Panel -->
-                <div class="bg-white rounded-lg shadow p-6">
-                    <h3 class="text-lg font-semibold text-slate-800 mb-4">Average Vitals</h3>
-                    <p class="text-sm text-slate-500 mb-6">Average readings from the worker's dataset.</p>
-                    
-                    <div class="grid grid-cols-3 gap-4 text-center">
-                        <div>
-                            <span class="text-xs text-slate-500 uppercase">Heart Rate</span>
-                            <p id="avgBpm" class="text-3xl font-bold text-slate-800">--</p>
-                        </div>
-                        <div>
-                            <span class="text-xs text-slate-500 uppercase">SpO2</span>
-                            <p id="avgSpO2" class="text-3xl font-bold text-slate-800">--</p>
-                        </div>
-                         <div>
-                            <span class="text-xs text-slate-500 uppercase">Stress</span>
-                            <p id="avgStress" class="text-xl font-bold text-slate-800">--</p>
-                        </div>
+                <!-- Blood Oxygen -->
+                <div class="bg-blue-50 rounded-lg shadow p-6 flex flex-col justify-between">
+                    <div class="flex items-center space-x-2 text-blue-700 font-semibold text-sm uppercase">
+                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l.621.621m.621-.621l.621.621m.621-.621l.621.621m.621-.621l.621.621M19.5 13.5l-.621.621m-.621-.621l-.621.621m-.621-.621l-.621.621m-.621-.621l-.621.621M12 3.75l.621.621m.621-.621L12 3.75zM12 3.75l-.621.621M12 3.75v16.5m-6.379-6.379l.621.621m.621-.621l.621.621m.621-.621l.621.621m.621-.621l.621.621M12 20.25l.621-.621m.621.621l.621-.621m.621.621l.621-.621m.621.621l.621-.621M12 20.25l-.621-.621m-.621.621l-.621-.621m-.621.621l-.621-.621m-.621.621l-.621-.621m12.728-6.379l-.621.621m-.621-.621l-.621.621m-.621-.621l-.621.621m-.621-.621l-.621.621" />
+                        </svg>
+                        <span>Avg. Blood Oxygen</span>
                     </div>
-                    <div class="grid grid-cols-2 gap-4 text-center mt-6">
-                         <div>
-                            <span class="text-xs text-slate-500 uppercase">Body Temp</span>
-                            <p id="avgTemp" class="text-2xl font-bold text-slate-800">--</p>
-                        </div>
-                        <div>
-                            <span class="text-xs text-slate-500 uppercase">Site Location</span>
-                            <p id="avgLat" class="text-sm font-medium text-slate-800">Lat: --</p>
-                            <p id="avgLon" class="text-sm font-medium text-slate-800">Lon: --</p>
-                        </div>
+                    <div id="avgSpO2" class="text-blue-600 text-4xl font-bold mt-2">--</div>
+                </div>
+                <!-- Body Temp -->
+                <div class="bg-orange-50 rounded-lg shadow p-6 flex flex-col justify-between">
+                    <div class="flex items-center space-x-2 text-orange-700 font-semibold text-sm uppercase">
+                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 12.75a.75.75 0 110-1.5.75.75 0 010 1.5zM12 18.75a.75.75 0 110-1.5.75.75 0 010 1.5z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 12V10.5a.75.75 0 011.5 0V12m0 0v1.5a.75.75 0 01-1.5 0V12m4.5 0V10.5a.75.75 0 011.5 0V12m0 0v1.5a.75.75 0 01-1.5 0V12m-2.25 1.5V18a.75.75 0 01-1.5 0V13.5m1.5 0V10.5a.75.75 0 011.5 0V13.5m0 0V15a.75.75 0 01-1.5 0V13.5" />
+                        </svg>
+                        <span>Avg. Body Temp</span>
                     </div>
+                    <div id="avgTemp" class="text-orange-600 text-4xl font-bold mt-2">--</div>
+                </div>
+                <!-- Stress -->
+                <div class="bg-indigo-50 rounded-lg shadow p-6 flex flex-col justify-between">
+                    <div class="flex items-center space-x-2 text-indigo-700 font-semibold text-sm uppercase">
+                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 18a.75.75 0 00.75-.75V11.25l1.04 1.04a.75.75 0 001.06-1.06l-2.25-2.25a.75.75 0 00-1.06 0l-2.25 2.25a.75.75 0 101.06 1.06l1.04-1.04v6a.75.75 0 00.75.75z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 3.75a2.25 2.25 0 100 4.5 2.25 2.25 0 000-4.5z" />
+                        </svg>
+                        <span>Total High Stress</span>
+                    </div>
+                    <div id="avgStressCount" class="text-indigo-600 text-4xl font-bold mt-2">--</div>
                 </div>
             </div>
 
-            <!-- Right Panel: Dashboard -->
-            <div class="lg:col-span-2 space-y-6">
-                <!-- Instructions -->
-                <div class="bg-brand-blue-light border-l-4 border-brand-blue text-brand-blue-dark p-6 rounded-lg shadow">
-                    <h3 class="text-lg font-semibold mb-2">How to Use This Dashboard</h3>
-                    <ol class="list-decimal list-inside text-sm space-y-1">
-                        <li>Select a worker from the dropdown.</li>
-                        <li>Their full data history will load on the charts.</li>
-                        <li>The "Average Vitals" panel will show the calculated averages.</li>
-                    </ol>
+            <!-- Data Table Section -->
+            <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+                <div class="p-6 data-header">
+                    <h3 class="text-lg font-semibold text-gray-800">Fixed Data Readings</h3>
                 </div>
-
-                <!-- Charts Grid -->
-                <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                    
-                    <!-- Heart Rate Chart -->
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <h3 class="text-lg font-semibold text-slate-800 mb-4">Heart Rate (BPM)</h3>
-                        <div class="chart-container">
-                            <canvas id="bpmChart"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Blood Oxygen Chart -->
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <h3 class="text-lg font-semibold text-slate-800 mb-4">Blood Oxygen (SpO2 %)</h3>
-                        <div class="chart-container">
-                            <canvas id="spo2Chart"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Body Temp Chart -->
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <h3 class="text-lg font-semibold text-slate-800 mb-4">Body Temperature (°C)</h3>
-                        <div class="chart-container">
-                            <canvas id="tempChart"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Stress Level Chart -->
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <h3 class="text-lg font-semibold text-slate-800 mb-4">Stress Level</h3>
-                        <div class="chart-container">
-                            <canvas id="stressChart"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Location Panel -->
-                    <div class="bg-white rounded-lg shadow p-6 xl:col-span-2">
-                        <h3 class="text-lg font-semibold text-slate-800 mb-2">Location Map</h3>
-                        <h4 class="text-sm font-medium text-slate-600 mb-4">Site Location: GSFC Plant, Moti Khavdi</h4>
-                        <div class="map-container">
-                            <div id="locationDot" class="location-dot"></div>
-                        </div>
-                        <p class="text-xs text-slate-500 mt-2 text-center">Representative worker location on site.</p>
-                    </div>
-
+                <div class="p-6">
+                    <table class="data-table w-full border-collapse">
+                        <thead class="bg-gray-800"> <!-- Dark header -->
+                            <tr>
+                                <th class="w-1/6">Worker / Date</th>
+                                <th class="w-1/6">Time</th>
+                                <th>BPM</th>
+                                <th>SpO2 %</th>
+                                <th>Temp °C</th>
+                                <th>Stress</th>
+                                <th>Location (Lat / Lon)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dataTableBody">
+                            <tr>
+                                <td colspan="7" class="text-center text-gray-500 py-8">Please select a worker to view their data.</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
-
+            
         </div>
     </main>
 
-    <!-- MAIN SCRIPT -->
+    <!-- 4. Add the JavaScript at the end -->
     <script>
-        // === 1. FIXED PRE-RECORDED DATA ===
+        // --- This is the new, hourly dataset ---
         const fixedRecordedData = {
             'worker-001': [
                 // Day 1: 2024-11-22
-                { time: "2024-11-22 09:00:00", bpm: 72, spO2: 98, temp: 36.6, stress: "Low", lat: 22.3242, lon: 70.0132 },
-                { time: "2024-11-22 09:00:02", bpm: 74, spO2: 98, temp: 36.6, stress: "Low", lat: 22.3242, lon: 70.0133 },
-                { time: "2024-11-22 09:00:04", bpm: 75, spO2: 98, temp: 36.7, stress: "Low", lat: 22.3243, lon: 70.0133 },
-                { time: "2024-11-22 09:00:06", bpm: 78, spO2: 97, temp: 36.7, stress: "Low", lat: 22.3243, lon: 70.0134 },
-                { time: "2024-11-22 09:00:08", bpm: 80, spO2: 98, temp: 36.8, stress: "Low", lat: 22.3244, lon: 70.0134 },
-                { time: "2024-11-22 09:00:10", bpm: 82, spO2: 98, temp: 36.8, stress: "Low", lat: 22.3244, lon: 70.0135 },
-                { time: "2024-11-22 09:00:12", bpm: 81, spO2: 98, temp: 36.8, stress: "Low", lat: 22.3245, lon: 70.0135 },
-                { time: "2024-11-22 09:00:14", bpm: 85, spO2: 97, temp: 36.9, stress: "Medium", lat: 22.3245, lon: 70.0136 },
+                { time: "2024-11-22 10:00:00", bpm: 72, spO2: 98, temp: 36.6, stress: "Low", lat: 22.3242, lon: 70.0132 },
+                { time: "2024-11-22 11:00:00", bpm: 75, spO2: 98, temp: 36.7, stress: "Low", lat: 22.3243, lon: 70.0133 },
+                { time: "2024-11-22 12:00:00", bpm: 80, spO2: 98, temp: 36.8, stress: "Low", lat: 22.3244, lon: 70.0134 },
+                { time: "2024-11-22 13:00:00", bpm: 82, spO2: 98, temp: 36.8, stress: "Low", lat: 22.3245, lon: 70.0135 },
+                { time: "2024-11-22 14:00:00", bpm: 85, spO2: 97, temp: 36.9, stress: "Medium", lat: 22.3246, lon: 70.0136 },
+                { time: "2024-11-22 15:00:00", bpm: 81, spO2: 98, temp: 36.8, stress: "Low", lat: 22.3247, lon: 70.0137 },
+                { time: "2024-11-22 16:00:00", bpm: 78, spO2: 98, temp: 36.7, stress: "Low", lat: 22.3248, lon: 70.0138 },
                 // Day 2: 2024-11-23
-                { time: "2024-11-23 09:00:16", bpm: 88, spO2: 97, temp: 36.9, stress: "Medium", lat: 22.3246, lon: 70.0136 },
-                { time: "2024-11-23 09:00:18", bpm: 86, spO2: 98, temp: 36.8, stress: "Medium", lat: 22.3246, lon: 70.0137 },
-                { time: "2024-11-23 09:00:20", bpm: 84, spO2: 98, temp: 36.8, stress: "Low", lat: 22.3247, lon: 70.0137 },
-                { time: "2024-11-23 09:00:22", bpm: 82, spO2: 98, temp: 36.7, stress: "Low", lat: 22.3247, lon: 70.0138 },
-                { time: "2024-11-23 09:00:24", bpm: 80, spO2: 99, temp: 36.7, stress: "Low", lat: 22.3248, lon: 70.0138 },
-                { time: "2024-11-23 09:00:26", bpm: 79, spO2: 99, temp: 36.7, stress: "Low", lat: 22.3248, lon: 70.0139 },
-                { time: "2024-11-23 09:00:28", bpm: 78, spO2: 99, temp: 36.6, stress: "Low", lat: 22.3249, lon: 70.0139 },
-                { time: "2024-11-23 09:00:30", bpm: 76, spO2: 98, temp: 36.6, stress: "Low", lat: 22.3249, lon: 70.0140 }
+                { time: "2024-11-23 10:00:00", bpm: 76, spO2: 99, temp: 36.6, stress: "Low", lat: 22.3249, lon: 70.0139 },
+                { time: "2024-11-23 11:00:00", bpm: 78, spO2: 98, temp: 36.7, stress: "Low", lat: 22.3248, lon: 70.0138 },
+                { time: "2024-11-23 12:00:00", bpm: 81, spO2: 98, temp: 36.7, stress: "Low", lat: 22.3247, lon: 70.0137 },
+                { time: "2024-11-23 13:00:00", bpm: 84, spO2: 98, temp: 36.8, stress: "Low", lat: 22.3246, lon: 70.0136 },
+                { time: "2024-11-23 14:00:00", bpm: 86, spO2: 98, temp: 36.8, stress: "Medium", lat: 22.3245, lon: 70.0135 },
+                { time: "2024-11-23 15:00:00", bpm: 82, spO2: 98, temp: 36.7, stress: "Low", lat: 22.3244, lon: 70.0134 },
+                { time: "2024-11-23 16:00:00", bpm: 80, spO2: 99, temp: 36.7, stress: "Low", lat: 22.3243, lon: 70.0133 },
             ],
             'worker-002': [
                 // Day 1: 2024-11-25
-                { time: "2024-11-25 09:00:00", bpm: 80, spO2: 98, temp: 36.8, stress: "Low", lat: 22.3250, lon: 70.0141 },
-                { time: "2024-11-25 09:00:02", bpm: 82, spO2: 98, temp: 36.9, stress: "Low", lat: 22.3250, lon: 70.0142 },
-                { time: "2024-11-25 09:00:04", bpm: 85, spO2: 97, temp: 37.0, stress: "Low", lat: 22.3251, lon: 70.0142 },
-                { time: "2024-11-25 09:00:06", bpm: 90, spO2: 97, temp: 37.1, stress: "Medium", lat: 22.3251, lon: 70.0143 },
-                { time: "2024-11-25 09:00:08", bpm: 95, spO2: 97, temp: 37.2, stress: "Medium", lat: 22.3252, lon: 70.0143 },
-                { time: "2024-11-25 09:00:10", bpm: 102, spO2: 96, temp: 37.3, stress: "Medium", lat: 22.3252, lon: 70.0144 },
-                { time: "2024-11-25 09:00:12", bpm: 110, spO2: 96, temp: 37.4, stress: "High", lat: 22.3253, lon: 70.0144 },
-                { time: "2024-11-25 09:00:14", bpm: 115, spO2: 95, temp: 37.5, stress: "High", lat: 22.3253, lon: 70.0145 },
+                { time: "2024-11-25 10:00:00", bpm: 80, spO2: 98, temp: 36.8, stress: "Low", lat: 22.3250, lon: 70.0141 },
+                { time: "2024-11-25 11:00:00", bpm: 85, spO2: 97, temp: 37.0, stress: "Low", lat: 22.3251, lon: 70.0142 },
+                { time: "2024-11-25 12:00:00", bpm: 90, spO2: 97, temp: 37.1, stress: "Medium", lat: 22.3252, lon: 70.0143 },
+                { time: "2024-11-25 13:00:00", bpm: 110, spO2: 96, temp: 37.4, stress: "High", lat: 22.3253, lon: 70.0144 },
+                { time: "2024-11-25 14:00:00", bpm: 105, spO2: 96, temp: 37.3, stress: "Medium", lat: 22.3254, lon: 70.0145 },
+                { time: "2024-11-25 15:00:00", bpm: 95, spO2: 97, temp: 37.1, stress: "Low", lat: 22.3255, lon: 70.0146 },
+                { time: "2024-11-25 16:00:00", bpm: 90, spO2: 98, temp: 36.9, stress: "Low", lat: 22.3256, lon: 70.0147 },
                 // Day 2: 2024-11-26
-                { time: "2024-11-26 09:00:16", bpm: 112, spO2: 95, temp: 37.4, stress: "High", lat: 22.3254, lon: 70.0145 },
-                { time: "2024-11-26 09:00:18", bpm: 105, spO2: 96, temp: 37.3, stress: "Medium", lat: 22.3254, lon: 70.0146 },
-                { time: "2024-11-26 09:00:20", bpm: 100, spO2: 97, temp: 37.2, stress: "Medium", lat: 22.3255, lon: 70.0146 },
-                { time: "2024-11-26 09:00:22", bpm: 95, spO2: 97, temp: 37.1, stress: "Low", lat: 22.3255, lon: 70.0147 },
-                { time: "2024-11-26 09:00:24", bpm: 92, spO2: 98, temp: 37.0, stress: "Low", lat: 22.3256, lon: 70.0147 },
-                { time: "2024-11-26 09:00:26", bpm: 90, spO2: 98, temp: 36.9, stress: "Low", lat: 22.3256, lon: 70.0148 },
-                { time: "2024-11-26 09:00:28", bpm: 88, spO2: 98, temp: 36.9, stress: "Low", lat: 22.3257, lon: 70.0148 },
-                { time: "2024-11-26 09:00:30", bpm: 86, spO2: 99, temp: 36.8, stress: "Low", lat: 22.3257, lon: 70.0149 }
+                { time: "2024-11-26 10:00:00", bpm: 88, spO2: 98, temp: 36.9, stress: "Low", lat: 22.3257, lon: 70.0148 },
+                { time: "2024-11-26 11:00:00", bpm: 92, spO2: 98, temp: 37.0, stress: "Low", lat: 22.3256, lon: 70.0147 },
+                { time: "2024-11-26 12:00:00", bpm: 95, spO2: 97, temp: 37.1, stress: "Medium", lat: 22.3255, lon: 70.0146 },
+                { time: "2024-11-26 13:00:00", bpm: 98, spO2: 97, temp: 37.2, stress: "Medium", lat: 22.3254, lon: 70.0145 },
+                { time: "2024-11-26 14:00:00", bpm: 115, spO2: 95, temp: 37.5, stress: "High", lat: 22.3253, lon: 70.0144 },
+                { time: "2024-11-26 15:00:00", bpm: 102, spO2: 96, temp: 37.3, stress: "Medium", lat: 22.3252, lon: 70.0143 },
+                { time: "2024-1all 26 16:00:00", bpm: 95, spO2: 97, temp: 37.1, stress: "Low", lat: 22.3251, lon: 70.0142 },
             ],
             'worker-003': [
                 // Day 1: 2024-11-27
-                { time: "2024-11-27 09:00:00", bpm: 75, spO2: 99, temp: 36.7, stress: "Low", lat: 22.3245, lon: 70.0136 },
-                { time: "2024-11-27 09:00:02", bpm: 74, spO2: 99, temp: 36.7, stress: "Low", lat: 22.3244, lon: 70.0136 },
-                { time: "2024-11-27 09:00:04", bpm: 76, spO2: 98, temp: 36.7, stress: "Low", lat: 22.3243, lon: 70.0135 },
-                { time: "2024-11-27 09:00:06", bpm: 78, spO2: 98, temp: 36.8, stress: "Low", lat: 22.3242, lon: 70.0135 },
-                { time: "2024-11-27 09:00:08", bpm: 80, spO2: 98, temp: 36.8, stress: "Low", lat: 22.3241, lon: 70.0134 },
-                { time: "2024-11-27 09:00:10", bpm: 90, spO2: 97, temp: 36.9, stress: "Medium", lat: 22.3240, lon: 70.0134 },
-                { time: "2024-11-27 09:00:12", bpm: 88, spO2: 97, temp: 37.0, stress: "Medium", lat: 22.3241, lon: 70.0133 },
-                { time: "2024-11-27 09:00:14", bpm: 86, spO2: 98, temp: 36.9, stress: "Medium", lat: 22.3242, lon: 70.0133 },
+                { time: "2024-11-27 10:00:00", bpm: 75, spO2: 99, temp: 36.7, stress: "Low", lat: 22.3245, lon: 70.0136 },
+                { time: "2024-11-27 11:00:00", bpm: 78, spO2: 98, temp: 36.8, stress: "Low", lat: 22.3244, lon: 70.0135 },
+                { time: "2024-11-27 12:00:00", bpm: 82, spO2: 98, temp: 36.8, stress: "Low", lat: 22.3243, lon: 70.0134 },
+                { time: "2024-11-27 13:00:00", bpm: 90, spO2: 97, temp: 36.9, stress: "Medium", lat: 22.3242, lon: 70.0133 },
+                { time: "2024-11-27 14:00:00", bpm: 95, spO2: 97, temp: 37.1, stress: "Medium", lat: 22.3241, lon: 70.0132 },
+                { time: "2024-11-27 15:00:00", bpm: 92, spO2: 97, temp: 37.0, stress: "Medium", lat: 22.3240, lon: 70.0131 },
+                { time: "2024-11-27 16:00:00", bpm: 88, spO2: 98, temp: 36.9, stress: "Low", lat: 22.3241, lon: 70.0132 },
                 // Day 2: 2024-11-28
-                { time: "2024-11-28 09:00:16", bpm: 92, spO2: 97, temp: 37.0, stress: "Medium", lat: 22.3243, lon: 70.0132 },
-                { time: "2024-11-28 09:00:18", bpm: 95, spO2: 97, temp: 37.1, stress: "Medium", lat: 22.3244, lon: 70.0132 },
-                { time: "2024-11-28 09:00:20", bpm: 105, spO2: 96, temp: 37.2, stress: "High", lat: 22.3245, lon: 70.0131 },
-                { time: "2024-11-28 09:00:22", bpm: 102, spO2: 96, temp: 37.1, stress: "High", lat: 22.3244, lon: 70.0131 },
-                { time: "2024-11-28 09:00:24", bpm: 98, spO2: 97, temp: 37.0, stress: "Medium", lat: 22.3243, lon: 70.0132 },
-                { time: "2024-11-28 09:00:26", bpm: 94, spO2: 97, temp: 36.9, stress: "Medium", lat: 22.3242, lon: 70.0132 },
-                { time: "2024-11-28 09:00:28", bpm: 90, spO2: 98, temp: 36.8, stress: "Low", lat: 22.3241, lon: 70.0133 },
-                { time: "2024-11-28 09:00:30", bpm: 88, spO2: 98, temp: 36.8, stress: "Low", lat: 22.3240, lon: 70.0133 }
-            ]
+                { time: "2024-11-28 10:00:00", bpm: 85, spO2: 98, temp: 36.8, stress: "Low", lat: 22.3242, lon: 70.0133 },
+                { time: "2024-11-28 11:00:00", bpm: 90, spO2: 97, temp: 36.9, stress: "Medium", lat: 22.3243, lon: 70.0134 },
+                { time: "2024-11-28 12:00:00", bpm: 105, spO2: 96, temp: 37.2, stress: "High", lat: 22.3244, lon: 70.0135 },
+                { time: "2024-11-28 13:00:00", bpm: 108, spO2: 96, temp: 37.3, stress: "High", lat: 22.3245, lon: 70.0136 },
+                { time: "2024-11-28 14:00:00", bpm: 102, spO2: 96, temp: 37.1, stress: "Medium", lat: 22.3244, lon: 70.0135 },
+                { time: "2024-11-28 15:00:00", bpm: 98, spO2: 97, temp: 37.0, stress: "Medium", lat: 22.3243, lon: 70.0134 },
+                { time: "2024-11-28 16:00:00", bpm: 94, spO2: 97, temp: 36.9, stress: "Medium", lat: 22.3242, lon: 70.0133 },
+            ],
         };
 
-        // Bounds of our simulated map for normalization
-        const mapBounds = {
-            minLat: 22.3240, maxLat: 22.3260,
-            minLon: 70.0130, maxLon: 70.0150
+        const workerNames = {
+            'worker-001': "Ramesh kumar (22, 23 Nov)",
+            'worker-002': "Nandlal Mahto (25, 26 Nov)",
+            'worker-003': "Sanjay Kumar (27, 28 Nov)",
         };
 
-        // === 2. STATE MANAGEMENT ===
-        let currentState = {
-            selectedWorkerId: null,
-        };
+        // --- This script handles the dropdown selection ---
+        document.addEventListener("DOMContentLoaded", function() {
 
-        // Chart.js instances
-        let charts = {
-            bpm: null,
-            spo2: null,
-            temp: null,
-            stress: null
-        };
+            // Get references to all the elements we need to update
+            const workerSelect = document.getElementById("workerSelect");
+            const dataBody = document.getElementById("dataTableBody");
+            const avgBPMEl = document.getElementById("avgBPM");
+            const avgSpO2El = document.getElementById("avgSpO2");
+            const avgTempEl = document.getElementById("avgTemp");
+            const avgStressCountEl = document.getElementById("avgStressCount");
 
-        // DOM Element references
-        let elements = {};
+            // This is the main function that updates the dashboard
+            function populateDashboard(selectedWorkerId) {
+                let totalBPM = 0, totalSpO2 = 0, totalTemp = 0, highStressCount = 0, dataCount = 0;
+                
+                // Clear the table body
+                dataBody.innerHTML = ""; // This line is now safe
 
+                // Decide which workers to show data for
+                let workersToProcess = [];
+                if (selectedWorkerId) {
+                    // A specific worker was chosen
+                    workersToProcess.push(selectedWorkerId);
+                } else {
+                    // "Show All" was chosen
+                    workersToProcess = Object.keys(fixedRecordedData); // ['worker-001', 'worker-002', 'worker-003']
+                }
 
-        // === 3. CORE FUNCTIONS ===
-
-        /**
-         * Initializes all charts with data for the selected worker.
-         */
-        function initCharts(workerId) {
-            // Destroy old charts if they exist
-            Object.values(charts).forEach(chart => {
-                if (chart) chart.destroy();
-            });
-
-            const commonOptions = (title) => ({
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    x: { 
-                        type: 'time',
-                        time: {
-                            tooltipFormat: 'MMM dd, yyyy HH:mm:ss',
-                            displayFormats: {
-                                second: 'HH:mm:ss',
-                                minute: 'HH:mm',
-                                hour: 'HH:mm',
-                                day: 'MMM dd' 
-                            }
-                        },
-                        title: { display: true, text: 'Date / Time' },
-                        ticks: { autoSkip: true, maxTicksLimit: 10 }
-                    },
-                    y: { 
-                        title: { display: true, text: title },
-                        beginAtZero: false 
-                    }
-                },
-                plugins: { 
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            title: function(tooltipItems) {
-                                const date = new Date(tooltipItems[0].parsed.x);
-                                return date.toLocaleString('en-US', { 
-                                    year: 'numeric', month: 'short', day: 'numeric', 
-                                    hour: '2-digit', minute: '2-digit', second: '2-digit' 
-                                });
-                            }
-                        }
-                    }
-                },
-                animation: { duration: 200 }
-            });
-
-            // Specific options for SpO2 chart (range 90-100)
-            const spo2Options = commonOptions('SpO2 %');
-            spo2Options.scales.y.min = 90;
-            spo2Options.scales.y.max = 100;
-            
-            // Specific options for Temp chart (range 35-40)
-            const tempOptions = commonOptions('Temperature °C');
-            tempOptions.scales.y.min = 35;
-            tempOptions.scales.y.max = 40;
-
-            // Specific options for Stress chart (0=Low, 1=Medium, 2=High)
-            const stressOptions = commonOptions('Stress Level');
-            stressOptions.scales.y = {
-                ...stressOptions.scales.y,
-                min: 0,
-                max: 2,
-                ticks: {
-                    stepSize: 1,
-                    callback: function(value) {
-                        return ['Low', 'Medium', 'High'][value];
+                if (workersToProcess.length === 0 || (selectedWorkerId === "" && workersToProcess.length === 3) ) {
+                    // Show "Please select" message if no worker is selected
+                    if(selectedWorkerId === "") {
+                        dataBody.innerHTML = '<tr><td colspan="7" class="text-center text-gray-500 py-8">Please select a worker to view their data.</td></tr>';
+                        
+                        // When "Show All" is selected, we want to show the *total* average
+                        let allData = [].concat(...Object.values(fixedRecordedData));
+                        updateAverages(allData);
+                        return;
                     }
                 }
-            };
+                
+                let workerDataForAverage = [];
 
-            // Map stress string to a number
-            const stressToNum = (stress) => {
-                if (stress === 'High') return 2;
-                if (stress === 'Medium') return 1;
-                return 0;
-            };
+                // Loop through the selected worker(s)
+                workersToProcess.forEach(workerId => {
+                    const data = fixedRecordedData[workerId];
+                    const workerName = workerNames[workerId];
+                    if (!data) return; // Skip if data is bad
 
-            // Get all data for the selected worker, or empty array if none
-            const workerData = fixedRecordedData[workerId] || [];
-            
-            // Prepare data for charts
-            const allData = {
-                labels: workerData.map(d => d.time),
-                bpm: workerData.map(d => d.bpm),
-                spo2: workerData.map(d => d.spO2),
-                temp: workerData.map(d => d.temp),
-                stress: workerData.map(d => stressToNum(d.stress))
-            };
+                    workerDataForAverage = workerDataForAverage.concat(data);
 
-            // Create charts
-            charts.bpm = new Chart(elements.bpmChartCtx, {
-                type: 'line',
-                data: { labels: allData.labels, datasets: [{ data: allData.bpm, borderColor: '#3B82F6', tension: 0.1, fill: false, pointRadius: 2 }] },
-                options: commonOptions('BPM')
-            });
+                    data.forEach((d, index) => {
+                        if (!d || !d.time) return; // Skip bad data point
+                    
+                        const datePart = d.time.substring(0, 10);
+                        const timePart = d.time.substring(11); // "HH:MM:SS"
+                        const hour = timePart.substring(0, 2); // Get hour for display
 
-            charts.spo2 = new Chart(elements.spo2ChartCtx, {
-                type: 'line',
-                data: { labels: allData.labels, datasets: [{ data: allData.spo2, borderColor: '#10B981', tension: 0.1, fill: false, pointRadius: 2 }] },
-                options: spo2Options
-            });
+                        let stressClass = "";
+                        if (d.stress === "High") {
+                            stressClass = "stress-high";
+                        } else if (d.stress === "Medium") {
+                            stressClass = "stress-medium";
+                        } else {
+                            stressClass = "stress-low";
+                        }
 
-            charts.temp = new Chart(elements.tempChartCtx, {
-                type: 'line',
-                data: { labels: allData.labels, datasets: [{ data: allData.temp, borderColor: '#F59E0B', tension: 0.1, fill: false, pointRadius: 2 }] },
-                options: tempOptions
-            });
+                        const row = document.createElement("tr");
+                        
+                        let dateDisplay = datePart.substring(8,10) + '-Nov';
+                        
+                        // Add a special cell for the worker name that spans all rows for them
+                        if (index === 0) {
+                            row.innerHTML = 
+                                '<td rowspan="' + data.length + '" style="font-weight: 600; background-color: #F9FAFB; vertical-align: middle; text-align: center; border-bottom: 2px solid #9CA3AF;">' +
+                                    workerName +
+                                '</td>';
+                        } else if (d.time.substring(0, 10) !== data[index-1].time.substring(0, 10)) {
+                            // If it's the first entry of a new day, add a border
+                            row.style.borderTop = "2px solid #6B7280";
+                        }
 
-            charts.stress = new Chart(elements.stressChartCtx, {
-                type: 'line',
-                data: { labels: allData.labels, datasets: [{ data: allData.stress, borderColor: '#6B7280', tension: 0.1, fill: false, stepped: true, pointRadius: 2 }] },
-                options: stressOptions
-            });
-        }
+                        // Add the rest of the data cells
+                        row.innerHTML += '<td>' + timePart + ' (' + dateDisplay + ')</td>' +
+                                        '<td>' + d.bpm + '</td>' +
+                                        '<td>' + d.spO2 + '</td>' +
+                                        '<td>' + d.temp.toFixed(1) + '</td>' +
+                                        '<td><span class="' + stressClass + '">' + d.stress + '</span></td>' +
+                                        '<td>' + d.lat.toFixed(4) + ' / ' + d.lon.toFixed(4) + '</td>';
 
-        /**
-         * Calculates and displays the average vitals for a worker.
-         */
-        function calculateAndDisplayAverages(workerId) {
-            const data = fixedRecordedData[workerId];
-            if (!data || data.length === 0) {
-                updateAverageVitals(null);
-                return;
+                        dataBody.appendChild(row);
+                    });
+                });
+
+                // Calculate and display averages for the selected worker(s)
+                updateAverages(workerDataForAverage);
             }
 
-            // Calculate averages
-            const total = data.reduce((acc, curr) => {
-                acc.bpm += curr.bpm;
-                acc.spO2 += curr.spO2;
-                acc.temp += curr.temp;
-                acc.stress[curr.stress] = (acc.stress[curr.stress] || 0) + 1;
-                return acc;
-            }, { bpm: 0, spO2: 0, temp: 0, stress: {} });
+            // Helper function to update the average boxes
+            function updateAverages(data) {
+                if (data.length === 0) {
+                    avgBPMEl.textContent = "--";
+                    avgSpO2El.textContent = "--";
+                    avgTempEl.textContent = "--";
+                    avgStressCountEl.textContent = "--";
+                    return;
+                }
 
-            const count = data.length;
-            
-            // Find most common stress level
-            const stressCounts = Object.values(total.stress);
-            if (stressCounts.length === 0) {
-                 var mostCommonStress = 'N/A';
-            } else {
-                 var mostCommonStress = Object.keys(total.stress).reduce((a, b) => total.stress[a] > total.stress[b] ? a : b);
+                let totalBPM = 0, totalSpO2 = 0, totalTemp = 0, highStressCount = 0;
+                
+                data.forEach(d => {
+                    totalBPM += d.bpm;
+                    totalSpO2 += d.spO2;
+                    totalTemp += d.temp;
+                    if (d.stress === "High") {
+                        highStressCount++;
+                    }
+                });
+
+                const dataCount = data.length;
+                const avgBPM = (totalBPM / dataCount).toFixed(1);
+                const avgSpO2 = (totalSpO2 / dataCount).toFixed(1);
+                const avgTemp = (totalTemp / dataCount).toFixed(1); 
+
+                // Re-color the average values based on the selection
+                avgBPMEl.textContent = avgBPM + " BPM";
+                avgSpO2El.textContent = avgSpO2 + " %";
+                avgTempEl.textContent = avgTemp + " °C";
+                avgStressCountEl.textContent = highStressCount + " Readings";
             }
 
-            const avgData = {
-                bpm: (total.bpm / count).toFixed(0),
-                spO2: (total.spO2 / count).toFixed(1),
-                temp: (total.temp / count).toFixed(1),
-                stress: mostCommonStress,
-                lat: data[0].lat,
-                lon: data[0].lon
-            };
-
-            updateAverageVitals(avgData);
-        }
-
-        /**
-         * Updates the "Average Vitals" panel.
-         */
-        function updateAverageVitals(data) {
-            if (!data) {
-                elements.avgBpm.textContent = '--';
-                elements.avgSpO2.textContent = '--';
-                elements.avgTemp.textContent = '--';
-                elements.avgStress.textContent = '--';
-                elements.avgLat.textContent = 'Lat: --';
-                elements.avgLon.textContent = 'Lon: --';
-                updateLocationDot(null, null);
-                return;
+            // Add the event listener to the dropdown
+            if (workerSelect) {
+                workerSelect.addEventListener("change", function(event) {
+                    // Get the selected worker ID (e.g., "worker-001")
+                    const selectedId = event.target.value;
+                    // Call the main function to update the dashboard
+                    populateDashboard(selectedId);
+                });
             }
 
-            elements.avgBpm.textContent = data.bpm;
-            elements.avgSpO2.textContent = data.spO2;
-            elements.avgTemp.textContent = data.temp;
-            elements.avgStress.textContent = data.stress;
-            elements.avgLat.textContent = Lat: ${data.lat.toFixed(4)};
-            elements.avgLon.textContent = Lon: ${data.lon.toFixed(4)};
-            
-            // Update stress color
-            elements.avgStress.classList.remove('text-safe-green', 'text-warn-yellow', 'text-danger-red', 'text-slate-800');
-            if(data.stress === 'Low') elements.avgStress.classList.add('text-safe-green');
-            else if(data.stress === 'Medium') elements.avgStress.classList.add('text-warn-yellow');
-            else if(data.stress === 'High') elements.avgStress.classList.add('text-danger-red');
-            else elements.avgStress.classList.add('text-slate-800');
-
-            // Update map dot to the representative location
-            updateLocationDot(data.lat, data.lon);
-        }
-
-        /**
-         * Updates the position of the dot on the simulated map.
-         */
-        function updateLocationDot(lat, lon) {
-            if (lat === null || lon === null) {
-                elements.locationDot.style.opacity = 0;
-                return;
-            }
-
-            const { minLat, maxLat, minLon, maxLon } = mapBounds;
-            
-            const percentX = (lon - minLon) / (maxLon - minLon);
-            const percentY = (lat - maxLat) / (minLat - maxLat);
-
-            const mapRect = elements.mapContainer.getBoundingClientRect();
-            const left = percentX * mapRect.width;
-            const top = percentY * mapRect.height;
-
-            elements.locationDot.style.opacity = 1;
-            elements.locationDot.style.left = ${Math.max(8, Math.min(left, mapRect.width - 8))}px;
-            elements.locationDot.style.top = ${Math.max(8, Math.min(top, mapRect.height - 8))}px;
-        }
-
-
-        // === 4. EVENT HANDLERS ===
-
-        /**
-         * Handles the user changing the worker selection.
-         */
-        function handleWorkerSelect(event) {
-            const workerId = event.target.value;
-            currentState.selectedWorkerId = workerId;
-
-            if (workerId) {
-                initCharts(workerId);
-                calculateAndDisplayAverages(workerId);
-            } else {
-                initCharts(null);
-                updateAverageVitals(null);
-            }
-        }
-
-        // === 5. INITIALIZATION ===
-        
-        /**
-         * This main function runs once the HTML document is fully loaded.
-         */
-        document.addEventListener('DOMContentLoaded', () => {
-            // Cache DOM elements
-            elements = {
-                workerSelect: document.getElementById('workerSelect'),
-                avgBpm: document.getElementById('avgBpm'),
-                avgSpO2: document.getElementById('avgSpO2'),
-                avgTemp: document.getElementById('avgTemp'),
-                avgStress: document.getElementById('avgStress'),
-                avgLat: document.getElementById('avgLat'),
-                avgLon: document.getElementById('avgLon'),
-                mapContainer: document.querySelector('.map-container'),
-                locationDot: document.getElementById('locationDot'),
-                bpmChartCtx: document.getElementById('bpmChart').getContext('2d'),
-                spo2ChartCtx: document.getElementById('spo2Chart').getContext('2d'),
-                tempChartCtx: document.getElementById('tempChart').getContext('2d'),
-                stressChartCtx: document.getElementById('stressChart').getContext('2d')
-            };
-
-            // Set up initial state
-            initCharts(null);
-            updateAverageVitals(null);
-
-            // Attach event listeners
-            elements.workerSelect.addEventListener('change', handleWorkerSelect);
+            // Load "Show All" by default
+            populateDashboard(""); 
         });
-
     </script>
 </body>
 </html>
+
